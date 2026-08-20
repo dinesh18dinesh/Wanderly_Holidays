@@ -1,0 +1,98 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Wanderly Holidays • Admin{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/admin-dashboard.css' %}?v=4">
+{% block extra_head %}{% endblock %}
+</head>
+<body class="admin-body">
+<div class="admin-shell">
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="brand">
+      <div class="brand-mark"><i class="fa-solid fa-earth-asia"></i><span></span></div>
+      <div class="brand-copy"><strong>Wanderly</strong><small>Holidays</small></div>
+      <button class="sidebar-close" id="sidebarClose" aria-label="Close menu"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <nav class="side-nav">
+      <div class="nav-label">OVERVIEW</div>
+      <a class="{% if active == 'overview' %}active{% endif %}" href="{% url 'admin_dashboard' %}"><i class="fa-solid fa-grid-2"></i><span>Overview</span></a>
+
+      <div class="nav-label">MANAGEMENT</div>
+      <a class="{% if active == 'bookings' %}active{% endif %}" href="{% url 'admin_section_list' section='bookings' %}"><i class="fa-regular fa-calendar-check"></i><span>Bookings</span></a>
+      <a class="{% if active == 'packages' %}active{% endif %}" href="{% url 'admin_section_list' section='packages' %}"><i class="fa-solid fa-cube"></i><span>Packages</span></a>
+      <a class="{% if active == 'destinations' %}active{% endif %}" href="{% url 'admin_section_list' section='destinations' %}"><i class="fa-solid fa-location-dot"></i><span>Destinations</span></a>
+      <a class="{% if active == 'users' %}active{% endif %}" href="{% url 'admin_users_list' %}"><i class="fa-regular fa-user"></i><span>Users</span></a>
+      <a class="{% if active == 'reviews' %}active{% endif %}" href="{% url 'admin_section_list' section='reviews' %}"><i class="fa-regular fa-star"></i><span>Reviews &amp; Ratings</span></a>
+      <a class="{% if active == 'enquiries' %}active{% endif %}" href="{% url 'admin_section_list' section='enquiries' %}"><i class="fa-regular fa-circle-question"></i><span>Enquiries</span></a>
+      <a class="{% if active == 'coupons' %}active{% endif %}" href="{% url 'admin_section_list' section='coupons' %}"><i class="fa-solid fa-ticket"></i><span>Coupons</span></a>
+
+      <div class="nav-label">CONTENT</div>
+      <a class="{% if active == 'testimonials' %}active{% endif %}" href="{% url 'admin_section_list' section='testimonials' %}"><i class="fa-solid fa-quote-left"></i><span>Testimonials</span></a>
+      <a class="{% if active == 'blogposts' %}active{% endif %}" href="{% url 'admin_section_list' section='blogposts' %}"><i class="fa-regular fa-newspaper"></i><span>Blog Posts</span></a>
+      <a class="{% if active == 'newsletter' %}active{% endif %}" href="{% url 'admin_section_list' section='newsletter' %}"><i class="fa-regular fa-envelope"></i><span>Newsletter</span></a>
+
+      <div class="nav-label">SYSTEM</div>
+      <a href="{% url 'admin_users_edit' pk=request.user.id %}"><i class="fa-regular fa-circle-user"></i><span>Profile</span></a>
+      <a href="{% url 'admin:password_change' %}"><i class="fa-solid fa-lock"></i><span>Change Password</span></a>
+    </nav>
+
+    <div class="sidebar-promo">
+      <strong>Grow Your Business</strong>
+      <p>Add new packages and attract more travelers.</p>
+      <div class="promo-illustration"><i class="fa-solid fa-suitcase-rolling"></i><i class="fa-solid fa-camera"></i></div>
+      <a href="{% url 'admin_section_add' section='packages' %}">Add New Package</a>
+    </div>
+
+    <div class="sidebar-bottom">
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></button>
+      </form>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+    <header class="admin-topbar">
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+      <div class="topbar-nav-actions">
+        <a href="javascript:history.back()" class="icon-button" title="Back"><i class="fa-solid fa-arrow-left"></i></a>
+        <a href="javascript:history.forward()" class="icon-button" title="Forward"><i class="fa-solid fa-arrow-right"></i></a>
+        <a href="{% url 'admin_dashboard' %}" class="icon-button" title="Home"><i class="fa-solid fa-house"></i></a>
+      </div>
+      <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="search" placeholder="Search bookings, users, packages..." aria-label="Search"></div>
+      <div class="top-actions">
+        <button class="icon-button notification"><i class="fa-regular fa-bell"></i><b>5</b></button>
+        <a class="profile-menu" href="{% url 'admin_users_edit' pk=request.user.id %}">
+          <span class="profile-avatar">{{ request.user.username|first|upper }}</span>
+          <span class="profile-copy"><strong>{{ request.user.first_name|default:request.user.username }}</strong><small>Super Admin</small></span>
+          <i class="fa-solid fa-chevron-down"></i>
+        </a>
+      </div>
+    </header>
+
+    {% if messages %}
+    <div class="admin-messages">
+      {% for message in messages %}
+        <div class="admin-alert admin-alert-{{ message.tags|default:'info' }}"><i class="fa-solid {% if message.tags == 'success' %}fa-circle-check{% elif message.tags == 'error' %}fa-circle-exclamation{% else %}fa-circle-info{% endif %}"></i><span>{{ message }}</span></div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+    <footer class="dashboard-footer"><span>© {% now "Y" %} Wanderly Holidays. All rights reserved.</span><span>Version 1.0.0</span></footer>
+  </main>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<script src="{% static 'js/admin-dashboard.js' %}"></script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

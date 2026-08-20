@@ -1,0 +1,382 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Create Your Wanderly Account{% endblock %}
+
+{% block content %}
+<section class="signup-page py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-xxl-11">
+        <div class="signup-shell shadow-lg">
+          <div class="signup-hero">
+            <div class="hero-badge"><i class="fa-solid fa-plane-departure"></i> WANDERLY TRAVELS</div>
+            <h1>Start your next journey.</h1>
+            <p>Create one account to manage holidays, travellers, bookings and every important trip detail.</p>
+            <div class="hero-points">
+              <div><i class="fa-solid fa-circle-check"></i><span>Save family & friends</span></div>
+              <div><i class="fa-solid fa-circle-check"></i><span>Edit your bookings</span></div>
+              <div><i class="fa-solid fa-circle-check"></i><span>Get your travel details in one place</span></div>
+            </div>
+            <div class="hero-decoration"><i class="fa-solid fa-earth-asia"></i></div>
+          </div>
+
+          <div class="signup-form-area">
+            <div class="form-heading">
+              <span class="section-kicker">CREATE ACCOUNT</span>
+              <h2>Tell us about yourself</h2>
+              <p>Complete your details to create your Wanderly travel account.</p>
+            </div>
+
+            <form method="post" id="signupForm" novalidate>
+              {% csrf_token %}
+              {% if form.non_field_errors %}
+                <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+              {% endif %}
+
+              <div class="form-section">
+                <h5><span>01</span> Personal information</h5>
+                <div class="row g-3">
+                  <div class="col-md-6">{{ form.username|as_crispy_field }}</div>
+                  <div class="col-md-6">{{ form.email|as_crispy_field }}</div>
+                  <div class="col-md-6">{{ form.first_name|as_crispy_field }}</div>
+                  <div class="col-md-6">{{ form.last_name|as_crispy_field }}</div>
+                  <div class="col-md-6">
+                    <div class="dob-picker-wrap">
+                      {{ form.date_of_birth|as_crispy_field }}
+                      <div id="dobCalendar" class="dob-calendar-popup" role="dialog" aria-label="Date of birth calendar">
+                        <div class="dob-calendar-head">
+                          <button type="button" class="dob-calendar-nav" id="dobPrev" aria-label="Previous month">‹</button>
+                          <select id="dobMonth" aria-label="Month"></select>
+                          <select id="dobYear" aria-label="Year"></select>
+                          <button type="button" class="dob-calendar-nav" id="dobNext" aria-label="Next month">›</button>
+                        </div>
+                        <div class="dob-calendar-week">
+                          <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                        </div>
+                        <div id="dobDays" class="dob-calendar-days"></div>
+                        <div class="dob-calendar-hint">Select any birth year from 1900 to today.</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">{{ form.gender|as_crispy_field }}</div>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <h5><span>02</span> Mobile & country</h5>
+                <div class="row g-3">
+                  <div class="col-md-5">{{ form.phone_country_code|as_crispy_field }}</div>
+                  <div class="col-md-7">{{ form.phone_number|as_crispy_field }}</div>
+                  <div class="col-md-6">
+                    {{ form.country|as_crispy_field }}
+                    <small id="countrySyncNote" class="sync-note"><i class="fa-solid fa-link"></i> Country code and residence are linked.</small>
+                  </div>
+                  <div class="col-md-6">{{ form.pincode|as_crispy_field }}</div>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <h5><span>03</span> Address</h5>
+                <div class="row g-3">
+                  <div class="col-12">{{ form.address|as_crispy_field }}</div>
+                  <div class="col-md-4">{{ form.city|as_crispy_field }}</div>
+                  <div class="col-md-4">{{ form.state|as_crispy_field }}</div>
+                  <div class="col-md-4">{{ form.newsletter_subscribed|as_crispy_field }}</div>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <h5><span>04</span> Secure your account</h5>
+                <div class="row g-3">
+                  <div class="col-md-6">{{ form.password1|as_crispy_field }}</div>
+                  <div class="col-md-6">{{ form.password2|as_crispy_field }}</div>
+                </div>
+              </div>
+
+              <div id="formMessage" class="alert alert-danger d-none"></div>
+              <button type="submit" class="btn btn-primary btn-lg rounded-pill w-100 signup-submit">
+                Create My Account <i class="fa-solid fa-arrow-right ms-2"></i>
+              </button>
+              <p class="text-center mt-4 mb-0 text-muted">Already have an account?
+                <a href="{% url 'login' %}" class="fw-semibold">Sign in</a>
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.signup-page{background:linear-gradient(135deg,#f5f9ff 0%,#eef7f5 50%,#fff 100%);min-height:calc(100vh - 70px)}
+.signup-shell{display:grid;grid-template-columns:34% 66%;background:#fff;border-radius:28px;overflow:hidden}
+.signup-hero{position:relative;padding:55px 45px;background:linear-gradient(145deg,#0d3b66,#087f8c);color:#fff;min-height:760px;overflow:hidden}
+.signup-hero:after{content:"";position:absolute;width:330px;height:330px;border-radius:50%;background:rgba(255,255,255,.08);right:-150px;bottom:-120px}
+.hero-badge{font-size:.78rem;letter-spacing:1.5px;font-weight:700;opacity:.9}
+.signup-hero h1{font-size:clamp(2.3rem,4vw,4rem);line-height:1.05;font-weight:800;margin:25px 0 20px}
+.signup-hero p{font-size:1.05rem;line-height:1.7;color:rgba(255,255,255,.82)}
+.hero-points{margin-top:40px;display:grid;gap:18px}
+.hero-points div{display:flex;align-items:center;gap:12px;font-weight:600}
+.hero-points i{color:#8ff0d0}
+.hero-decoration{position:absolute;bottom:50px;left:40px;font-size:8rem;opacity:.12;transform:rotate(-12deg)}
+.signup-form-area{padding:50px 55px}
+.section-kicker{font-size:.72rem;letter-spacing:2px;font-weight:800;color:#087f8c}
+.form-heading h2{font-weight:800;margin:8px 0}
+.form-heading p{color:#6c757d;margin-bottom:30px}
+.form-section{border-top:1px solid #e9edf2;padding-top:24px;margin-top:25px}
+.form-section h5{font-weight:800;margin-bottom:20px}
+.form-section h5 span{display:inline-flex;width:30px;height:30px;border-radius:50%;align-items:center;justify-content:center;background:#eaf8f6;color:#087f8c;font-size:.75rem;margin-right:8px}
+.signup-form-area .form-control,.signup-form-area .form-select{border-radius:12px;padding:.78rem .9rem;border-color:#dce3ea}
+.signup-form-area .form-control:focus,.signup-form-area .form-select:focus{box-shadow:0 0 0 .2rem rgba(8,127,140,.12);border-color:#087f8c}
+.signup-submit{padding:14px;font-weight:700}
+.sync-note{display:block;color:#087f8c;margin-top:6px;font-size:.78rem}
+@media(max-width:991px){.signup-shell{grid-template-columns:1fr}.signup-hero{min-height:auto;padding:40px}.hero-decoration{display:none}.signup-form-area{padding:35px 25px}}
+
+/* DOB calendar: custom popup keeps the calendar look while allowing any year from 1900 to today */
+.dob-picker-wrap{position:relative}
+.dob-picker-input{background:#fff!important;cursor:pointer!important}
+.dob-calendar-popup{position:absolute;z-index:1055;top:calc(100% + 6px);left:0;width:330px;max-width:calc(100vw - 32px);background:#fff;border:1px solid #dbe3ea;border-radius:16px;box-shadow:0 18px 45px rgba(13,59,102,.18);padding:14px;display:none}
+.dob-calendar-popup.show{display:block}
+.dob-calendar-head{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-bottom:10px}
+.dob-calendar-head select{border:1px solid #dbe3ea;border-radius:9px;padding:7px 8px;background:#fff;font-weight:600;font-size:.9rem}
+.dob-calendar-nav{width:34px;height:34px;border:1px solid #dbe3ea;background:#fff;border-radius:9px;cursor:pointer}
+.dob-calendar-nav:hover{background:#f2f7fb}
+.dob-calendar-week,.dob-calendar-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.dob-calendar-week div{font-size:.72rem;font-weight:700;color:#7b8794;padding:5px 0}
+.dob-day{height:34px;border:0;background:#fff;border-radius:8px;cursor:pointer;font-size:.86rem}
+.dob-day:hover{background:#eaf5ff}
+.dob-day.selected{background:#087f8c;color:#fff;font-weight:700}
+.dob-day.today{outline:1px solid #087f8c}
+.dob-day.muted{color:#c4cbd2;cursor:default}
+.dob-calendar-hint{font-size:.72rem;color:#7b8794;margin:9px 2px 0}
+
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const form = document.getElementById('signupForm');
+  const first = document.getElementById('id_first_name');
+  const last = document.getElementById('id_last_name');
+  const phone = document.getElementById('id_phone_number');
+  const email = document.getElementById('id_email');
+  const country = document.getElementById('id_country');
+  const code = document.getElementById('id_phone_country_code');
+  const pincode = document.getElementById('id_pincode');
+  const message = document.getElementById('formMessage');
+
+  const countryCodes = {
+    'India': '+91','United States': '+1','Canada': '+1','United Kingdom': '+44',
+    'France': '+33','Italy': '+39','Germany': '+49','Switzerland': '+41',
+    'Spain': '+34','Greece': '+30','Netherlands': '+31','Austria': '+43',
+    'Hungary': '+36','Portugal': '+351','Iceland': '+354','Norway': '+47',
+    'Croatia': '+385','United Arab Emirates': '+971','Singapore': '+65',
+    'Malaysia': '+60','Thailand': '+66','Indonesia': '+62','Australia': '+61',
+    'Japan': '+81','South Korea': '+82'
+  };
+
+  const pinRules = {
+    'India': [/^[0-9]{6}$/,6,'India PIN code must be exactly 6 digits.'],
+    'United States': [/^[0-9]{5}(?:-[0-9]{4})?$/,10,'US ZIP code must be 5 digits or ZIP+4.'],
+    'Canada': [/^[A-Za-z][0-9][A-Za-z] ?[0-9][A-Za-z][0-9]$/,7,'Canada postal code must follow A1A 1A1 format.'],
+    'United Kingdom': [/^[A-Za-z0-9 ]{5,8}$/,8,'Enter a valid UK postcode.'],
+    'Australia': [/^[0-9]{4}$/,4,'Australia postcode must be exactly 4 digits.'],
+    'France': [/^[0-9]{5}$/,5,'France postal code must be exactly 5 digits.'],
+    'Germany': [/^[0-9]{5}$/,5,'Germany postal code must be exactly 5 digits.'],
+    'Italy': [/^[0-9]{5}$/,5,'Italy postal code must be exactly 5 digits.'],
+    'Spain': [/^[0-9]{5}$/,5,'Spain postal code must be exactly 5 digits.'],
+    'Greece': [/^[0-9]{5}$/,5,'Greece postal code must be exactly 5 digits.'],
+    'Croatia': [/^[0-9]{5}$/,5,'Croatia postal code must be exactly 5 digits.'],
+    'Switzerland': [/^[0-9]{4}$/,4,'Switzerland postal code must be exactly 4 digits.'],
+    'Singapore': [/^[0-9]{6}$/,6,'Singapore postal code must be exactly 6 digits.'],
+    'Other': [/^[A-Za-z0-9 -]{3,12}$/,12,'Enter a valid postal code.']
+  };
+
+  function setCodeForCountry(){
+    if(!country || !code) return;
+    const wanted = countryCodes[country.value];
+    if(wanted){
+      const option = Array.from(code.options).find(o => o.value === wanted);
+      if(option) code.value = wanted;
+    }
+  }
+
+  function setCountryForCode(){
+    if(!country || !code) return;
+    const matches = Object.keys(countryCodes).filter(c => countryCodes[c] === code.value);
+    // +1 is shared by USA/Canada; preserve current choice when possible.
+    if(matches.length === 1){
+      country.value = matches[0];
+    } else if(matches.length > 1 && !matches.includes(country.value)){
+      country.value = matches[0];
+    }
+    updatePincode();
+  }
+
+  function updatePincode(){
+    if(!country || !pincode) return;
+    const rule = pinRules[country.value] || pinRules.Other;
+    pincode.maxLength = rule[1];
+    pincode.title = rule[2];
+    pincode.placeholder = country.value === 'India' ? 'e.g. 560001' : 'Enter postal code';
+  }
+
+  if(country) country.addEventListener('change', function(){ setCodeForCountry(); updatePincode(); });
+  if(code) code.addEventListener('change', function(){ setCountryForCode(); });
+  if(pincode) pincode.addEventListener('input', function(){
+    if(country && country.value === 'India') this.value = this.value.replace(/\D/g,'').slice(0,6);
+  });
+  setCodeForCountry();
+  updatePincode();
+
+  if(form){
+    form.addEventListener('submit', function(e){
+      let ok = true;
+      [first,last].forEach(function(el){
+        if(el && !/^[A-Za-z]+$/.test(el.value.trim())){
+          el.setCustomValidity('Letters only. Numbers and symbols are not allowed.');
+          ok=false;
+        } else if(el) el.setCustomValidity('');
+      });
+      if(phone && !/^[0-9]{7,15}$/.test(phone.value)){
+        phone.setCustomValidity('Enter 7 to 15 digits only.');
+        ok=false;
+      } else if(phone) phone.setCustomValidity('');
+      if (email && !/^[A-Za-z0-9._%+-]+@gmail\.com$/i.test(email.value.trim())) {
+    email.setCustomValidity('Please enter a valid Gmail address ending with @gmail.com.');
+    ok = false;
+} else if (email) {
+    email.setCustomValidity('');
+}
+      if(country && pincode){
+        const rule = pinRules[country.value] || pinRules.Other;
+        if(!rule[0].test(pincode.value.trim())){
+          pincode.setCustomValidity(rule[2]);
+          ok=false;
+        } else pincode.setCustomValidity('');
+      }
+      if(!ok){
+        e.preventDefault();
+        message.classList.remove('d-none');
+        message.textContent='Please correct the highlighted fields before creating your account.';
+        this.reportValidity();
+      }
+    });
+  }
+});
+
+/* Custom DOB calendar */
+(function(){
+  const input = document.getElementById('id_date_of_birth');
+  const popup = document.getElementById('dobCalendar');
+  const monthSelect = document.getElementById('dobMonth');
+  const yearSelect = document.getElementById('dobYear');
+  const daysBox = document.getElementById('dobDays');
+  const prev = document.getElementById('dobPrev');
+  const next = document.getElementById('dobNext');
+
+  if(!input || !popup || !monthSelect || !yearSelect || !daysBox) return;
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const minYear = 1900;
+  const maxYear = today.getFullYear();
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  months.forEach((name,i)=>{
+    const opt=document.createElement('option');
+    opt.value=i; opt.textContent=name;
+    monthSelect.appendChild(opt);
+  });
+  for(let y=maxYear;y>=minYear;y--){
+    const opt=document.createElement('option');
+    opt.value=y; opt.textContent=y;
+    yearSelect.appendChild(opt);
+  }
+
+  let view = new Date(maxYear, today.getMonth(), 1);
+
+  function parseInput(){
+    const m = input.value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if(!m) return null;
+    const d = new Date(Number(m[3]), Number(m[2])-1, Number(m[1]));
+    if(d.getFullYear()!==Number(m[3]) || d.getMonth()!==Number(m[2])-1 || d.getDate()!==Number(m[1])) return null;
+    return d;
+  }
+
+  function formatDate(d){
+    return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
+  }
+
+  function render(){
+    monthSelect.value=view.getMonth();
+    yearSelect.value=view.getFullYear();
+    daysBox.innerHTML='';
+    const first=new Date(view.getFullYear(),view.getMonth(),1).getDay();
+    const count=new Date(view.getFullYear(),view.getMonth()+1,0).getDate();
+    const selected=parseInput();
+
+    for(let i=0;i<first;i++){
+      const blank=document.createElement('button');
+      blank.type='button'; blank.className='dob-day muted'; blank.disabled=true; blank.textContent='';
+      daysBox.appendChild(blank);
+    }
+    for(let day=1;day<=count;day++){
+      const b=document.createElement('button');
+      b.type='button'; b.className='dob-day'; b.textContent=day;
+      const d=new Date(view.getFullYear(),view.getMonth(),day);
+      if(d.getTime()===today.getTime()) b.classList.add('today');
+      if(selected && d.getTime()===selected.getTime()) b.classList.add('selected');
+      if(d>today){
+        b.disabled=true; b.classList.add('muted');
+      } else {
+        b.addEventListener('click',()=>{
+          input.value=formatDate(d);
+          input.dispatchEvent(new Event('change',{bubbles:true}));
+          close();
+        });
+      }
+      daysBox.appendChild(b);
+    }
+  }
+
+  function open(){
+    const selected=parseInput();
+    if(selected) view=new Date(selected.getFullYear(),selected.getMonth(),1);
+    else view=new Date(maxYear,today.getMonth(),1);
+    popup.classList.add('show');
+    input.setAttribute('aria-expanded','true');
+    render();
+  }
+  function close(){
+    popup.classList.remove('show');
+    input.setAttribute('aria-expanded','false');
+  }
+
+  input.addEventListener('click',open);
+  input.addEventListener('keydown',e=>{
+    if(e.key==='Enter' || e.key===' '){ e.preventDefault(); open(); }
+    if(e.key==='Escape') close();
+  });
+  monthSelect.addEventListener('change',()=>{
+    view=new Date(Number(yearSelect.value),Number(monthSelect.value),1); render();
+  });
+  yearSelect.addEventListener('change',()=>{
+    view=new Date(Number(yearSelect.value),Number(monthSelect.value),1); render();
+  });
+  prev.addEventListener('click',()=>{
+    view=new Date(view.getFullYear(),view.getMonth()-1,1);
+    if(view.getFullYear()<minYear) view=new Date(minYear,0,1);
+    render();
+  });
+  next.addEventListener('click',()=>{
+    const nextMonth=new Date(view.getFullYear(),view.getMonth()+1,1);
+    if(nextMonth<=new Date(maxYear,today.getMonth(),1)){ view=nextMonth; render(); }
+  });
+  document.addEventListener('click',e=>{
+    if(!popup.contains(e.target) && e.target!==input && !input.contains(e.target)) close();
+  });
+})();
+
+</script>
+{% endblock %}

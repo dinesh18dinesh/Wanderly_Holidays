@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block title %}Travel Guide{% endblock %}
+{% block content %}
+<div class="page-hero"><div class="container"><span class="eyebrow text-white">TRAVEL INSPIRATION</span><h1>Travel Guide</h1><p>Destination ideas, planning tips and inspiration.</p></div></div>
+<div class="container py-5"><div class="row g-4">{% for post in page_obj %}<div class="col-md-6 col-lg-4"><article class="blog-card card h-100">{% if post.image %}<img onerror="this.onerror=null;this.src='/static/images/travel-placeholder.svg';" src="{{ post.image.url }}" alt="{{ post.title }}">{% endif %}<div class="p-4"><small class="text-muted">{{ post.published_at|date:"d M Y" }}</small><h4 class="mt-2"><a href="{% url 'blog_detail' post.slug %}">{{ post.title }}</a></h4><p class="text-muted">{{ post.excerpt }}</p><a href="{% url 'blog_detail' post.slug %}" class="fw-bold">Read more <i class="fa-solid fa-arrow-right"></i></a></div></article></div>{% empty %}<div class="col-12"><div class="empty-state">No published articles yet. Add them from Admin.</div></div>{% endfor %}</div>{% include 'includes/pagination.html' %}</div>
+{% endblock %}

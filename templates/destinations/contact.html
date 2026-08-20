@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Contact Us{% endblock %}
+{% block content %}
+<div class="page-hero"><div class="container"><span class="eyebrow text-white">WE'RE HERE TO HELP</span><h1>Contact us</h1><p>Talk to a travel expert about your next holiday.</p></div></div>
+<div class="container py-5"><div class="row g-4">
+ <div class="col-md-4"><div class="contact-card"><i class="fa-solid fa-phone"></i><h5>Call</h5><p>+91 90000 00000</p></div></div>
+ <div class="col-md-4"><div class="contact-card"><i class="fa-solid fa-envelope"></i><h5>Email</h5><p>hello@wanderly.example</p></div></div>
+ <div class="col-md-4"><div class="contact-card"><i class="fa-solid fa-clock"></i><h5>Support</h5><p>Travel assistance for your booking.</p></div></div>
+</div><div class="row mt-5 g-4"><div class="col-lg-7"><div class="map-placeholder large"><i class="fa-solid fa-map-location-dot fa-3x"></i><h4>Travel office</h4><p>Chennai · Bangalore · Coimbatore · Madurai · Kochi</p></div></div><div class="col-lg-5"><div class="card p-4 border-0 shadow-sm"><h4>Ready to travel?</h4><p class="text-muted">Skip the long forms and tell us your requirements.</p><a class="btn btn-primary rounded-pill" href="{% url 'enquiry' %}">Plan My Trip</a></div></div></div></div>
+{% endblock %}

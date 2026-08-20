@@ -1,0 +1,7 @@
+Django==4.2.16
+django-crispy-forms==2.3
+crispy-bootstrap5==2024.10
+Pillow==10.4.0
+python-dotenv==1.0.1
+reportlab==4.2.5
+razorpay==1.4.2

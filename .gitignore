@@ -1,0 +1,24 @@
+# Virtual environment
+travel_env/
+venv/
+env/
+
+# Environment variables
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django
+*.log
+staticfiles/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

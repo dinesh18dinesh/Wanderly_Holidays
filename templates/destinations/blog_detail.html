@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% block title %}{{ post.title }}{% endblock %}
+{% block content %}
+<div class="container py-5"><div class="row justify-content-center"><div class="col-lg-9"><small class="text-muted">{{ post.published_at|date:"d M Y" }}</small><h1 class="display-5 fw-bold mt-2">{{ post.title }}</h1>{% if post.image %}<img class="w-100 rounded-4 my-4 detail-image" src="{{ post.image.url }}" alt="{{ post.title }}">{% endif %}<p class="lead">{{ post.excerpt }}</p><div class="article-body">{{ post.content|linebreaks }}</div><a href="{% url 'blog' %}" class="btn btn-outline-primary rounded-pill mt-4">← Back to guide</a></div></div></div>
+{% endblock %}

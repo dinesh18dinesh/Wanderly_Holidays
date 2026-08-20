@@ -1,0 +1,58 @@
+{% extends 'admin_panel/_base.html' %}
+{% block title %}Users • Wanderly Admin{% endblock %}
+{% block content %}
+<section class="panel-page">
+  <div class="page-header">
+    <div>
+      <div class="breadcrumb"><a href="{% url 'admin_dashboard' %}">Dashboard</a><i class="fa-solid fa-chevron-right"></i><span>Users</span></div>
+      <h1><i class="fa-regular fa-user"></i> Users <span class="count-pill">{{ total_count }}</span></h1>
+    </div>
+    <div class="page-actions">
+      <form class="search-form" method="get">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="search" name="q" value="{{ query }}" placeholder="Search users...">
+      </form>
+      <a class="btn-primary" href="{% url 'admin_users_add' %}"><i class="fa-solid fa-plus"></i> Add User</a>
+    </div>
+  </div>
+
+  <div class="panel data-panel">
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>User</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th class="col-actions">Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for u in page_obj %}
+          <tr>
+            <td><div class="user-cell"><span class="user-avatar">{{ u.username|first|upper }}</span><div><strong>{{ u.get_full_name|default:u.username }}</strong><small>@{{ u.username }}</small></div></div></td>
+            <td>{{ u.email|default:"—" }}</td>
+            <td>{% if u.is_superuser %}<span class="badge badge-purple">Superuser</span>{% elif u.is_staff %}<span class="badge badge-blue">Staff</span>{% else %}<span class="badge badge-gray">Traveler</span>{% endif %}</td>
+            <td>{% if u.is_active %}<span class="badge badge-green"><i class="fa-solid fa-check"></i> Active</span>{% else %}<span class="badge badge-gray"><i class="fa-solid fa-xmark"></i> Inactive</span>{% endif %}</td>
+            <td>{{ u.date_joined|date:"d M Y" }}</td>
+            <td class="col-actions">
+              <div class="row-actions">
+                <a class="row-action" title="Edit" href="{% url 'admin_users_edit' pk=u.pk %}"><i class="fa-solid fa-pen"></i></a>
+                <form method="post" action="{% url 'admin_users_delete' pk=u.pk %}" onsubmit="return confirm('Delete user {{ u.username }}? This cannot be undone.');">
+                  {% csrf_token %}
+                  <button class="row-action row-action-danger" type="submit" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="empty-row">No users found{% if query %} for "{{ query }}"{% endif %}.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="pagination">
+      {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}"><i class="fa-solid fa-chevron-left"></i></a>{% endif %}
+      <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}"><i class="fa-solid fa-chevron-right"></i></a>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

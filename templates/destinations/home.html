@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block title %}India & International Holiday Packages{% endblock %}
+{% block content %}
+<section class="hero">
+ <div class="hero-overlay"></div>
+ <div class="container hero-content text-white">
+   <div class="eyebrow">TRAVEL • EXPERIENCE • DISCOVER</div>
+   <h1>Travel farther.<br><span>Live the journey.</span></h1>
+   <p class="lead col-lg-7">Discover curated India and international holidays, romantic getaways, family vacations and tailor-made trips.</p>
+   <form action="{% url 'package_list' %}" method="get" class="hero-search hero-package-search" id="heroPackageSearch" autocomplete="off">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input id="heroSearchInput" name="q" placeholder="Where do you want to go?" aria-label="Search destinations and packages" aria-autocomplete="list" aria-controls="packageSuggestions">
+      <button type="submit" class="btn btn-primary rounded-pill px-4" id="heroSearchButton">Search</button>
+      <div id="packageSuggestions" class="package-suggestions" role="listbox" aria-label="Package suggestions"></div>
+   </form>
+   <div class="search-help" id="searchHelp">Start typing a destination or holiday type to see available packages.</div>
+
+   <div class="modal fade" id="packageUnavailableModal" tabindex="-1" aria-labelledby="packageUnavailableTitle" aria-hidden="true">
+     <div class="modal-dialog modal-dialog-centered">
+       <div class="modal-content package-unavailable-modal">
+         <div class="modal-body text-center p-4 p-md-5">
+           <div class="unavailable-icon"><i class="fa-solid fa-location-dot"></i></div>
+           <h4 id="packageUnavailableTitle" class="fw-bold mt-3">Package not available</h4>
+           <p id="packageUnavailableMessage" class="text-muted mb-4">We couldn't find a package for your search.</p>
+           <div class="d-flex justify-content-center gap-2 flex-wrap">
+             <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal">Try Again</button>
+             <a href="{% url 'package_list' %}" class="btn btn-outline-secondary rounded-pill px-4">View All Packages</a>
+           </div>
+         </div>
+       </div>
+     </div>
+   </div>
+   <div class="hero-links mt-3">
+     <span>Popular:</span>
+     <a href="{% url 'package_list' %}?q=Bali">Bali</a><a href="{% url 'package_list' %}?q=Kerala">Kerala</a><a href="{% url 'package_list' %}?q=Maldives">Maldives</a><a href="{% url 'package_list' %}?q=Europe">Europe</a>
+   </div>
+ </div>
+</section>
+
+<section class="quick-strip">
+ <div class="container"><div class="row g-0">
+   <div class="col-md-3 quick-item"><i class="fa-solid fa-earth-asia"></i><div><b>India & International</b><small>Hundreds of destinations</small></div></div>
+   <div class="col-md-3 quick-item"><i class="fa-solid fa-route"></i><div><b>Tailor-made trips</b><small>Built around you</small></div></div>
+   <div class="col-md-3 quick-item"><i class="fa-solid fa-headset"></i><div><b>Travel experts</b><small>Personal assistance</small></div></div>
+   <div class="col-md-3 quick-item"><i class="fa-solid fa-shield-heart"></i><div><b>Secure booking</b><small>Safe & transparent</small></div></div>
+ </div></div>
+</section>
+
+<section class="container py-5">
+ <div class="section-head"><div><span class="eyebrow text-primary">CHOOSE YOUR STYLE</span><h2>Popular holiday themes</h2></div><a href="{% url 'package_list' %}" class="btn btn-outline-primary rounded-pill">View all</a></div>
+ <div class="theme-grid">
+  <a class="theme-card" href="{% url 'package_list' %}?type=honeymoon"><i class="fa-solid fa-heart"></i><b>Honeymoon</b><span>Romantic escapes</span></a>
+  <a class="theme-card" href="{% url 'package_list' %}?type=family"><i class="fa-solid fa-people-roof"></i><b>Family</b><span>Fun for everyone</span></a>
+  <a class="theme-card" href="{% url 'package_list' %}?type=adventure"><i class="fa-solid fa-mountain-sun"></i><b>Adventure</b><span>Thrills & nature</span></a>
+  <a class="theme-card" href="{% url 'package_list' %}?type=luxury"><i class="fa-solid fa-gem"></i><b>Luxury</b><span>Premium stays</span></a>
+  <a class="theme-card" href="{% url 'package_list' %}?type=cultural"><i class="fa-solid fa-landmark"></i><b>Cultural</b><span>History & heritage</span></a>
+  <a class="theme-card" href="{% url 'package_list' %}?type=wildlife"><i class="fa-solid fa-paw"></i><b>Wildlife</b><span>Wild escapes</span></a>
+ </div>
+</section>
+
+<section class="bg-soft py-5">
+ <div class="container">
+  <div class="section-head"><div><span class="eyebrow text-primary">HANDPICKED FOR YOU</span><h2>Featured packages</h2></div><a href="{% url 'package_list' %}" class="btn btn-outline-primary rounded-pill">Explore packages</a></div>
+  <div class="row g-4">
+   {% for package in featured_packages %}
+   <div class="col-md-6 col-lg-3">
+    <div class="package-card card h-100">
+      <div class="package-image-wrap">
+       {% if package.image_src %}<img onerror="this.onerror=null;this.src='/static/images/travel-placeholder.svg';" src="{{ package.image_src }}" alt="{{ package.name }}" loading="lazy">
+       {% else %}<div class="placeholder-img"><i class="fa-solid fa-image"></i></div>{% endif %}
+       {% if package.discount_percent %}<span class="discount-badge">{{ package.discount_percent }}% OFF</span>{% endif %}
+       {% if user.is_authenticated %}<a href="{% url 'toggle_wishlist' package.slug %}" class="heart-btn"><i class="fa-regular fa-heart"></i></a>{% endif %}
+      </div>
+      <div class="card-body">
+       <span class="category-pill">{{ package.get_package_type_display }}</span>
+       <h5 class="mt-2"><a href="{{ package.get_absolute_url }}">{{ package.name }}</a></h5>
+       <p class="small text-muted mb-2"><i class="fa-solid fa-location-dot"></i> {{ package.destination.city }}, {{ package.destination.country }}</p>
+       <div class="rating-row"><span class="stars">★★★★★</span> <small>{{ package.average_rating|floatformat:1 }}</small> <span class="ms-auto">{{ package.duration_days }} days</span></div>
+       <div class="price-row mt-3"><div><small>From</small><strong>₹{{ package.effective_price }}</strong>{% if package.discount_price %}<del>₹{{ package.price }}</del>{% endif %}</div><a href="{{ package.get_absolute_url }}" class="btn btn-primary btn-sm rounded-pill">View</a></div>
+      </div>
+    </div>
+   </div>
+   {% empty %}<div class="col-12"><div class="empty-state">Add featured packages from the admin dashboard.</div></div>{% endfor %}
+  </div>
+ </div>
+</section>
+
+<section class="container py-5">
+ <div class="section-head"><div><span class="eyebrow text-primary">TOP PICKS</span><h2>Featured destinations</h2></div><a href="{% url 'destination_list' %}" class="btn btn-outline-primary rounded-pill">View destinations</a></div>
+ <div class="row g-4">
+  {% for destination in featured_destinations %}
+  <div class="col-6 col-md-4 col-lg-3">
+   <a href="{{ destination.get_absolute_url }}" class="destination-tile">
+    {% if destination.image_src %}<img onerror="this.onerror=null;this.src='/static/images/travel-placeholder.svg';" src="{{ destination.image_src }}" alt="{{ destination.name }}" loading="lazy">{% else %}<div class="placeholder-img"><i class="fa-solid fa-mountain-sun"></i></div>{% endif %}
+    <div class="tile-overlay"><small>{{ destination.country }}</small><h5>{{ destination.name }}</h5></div>
+   </a>
+  </div>
+  {% empty %}<div class="col-12"><div class="empty-state">Add destinations from the admin dashboard.</div></div>{% endfor %}
+ </div>
+</section>
+
+<section class="cta-band">
+ <div class="container"><div class="row align-items-center g-4">
+  <div class="col-lg-8"><span class="eyebrow">CAN'T FIND THE PERFECT PACKAGE?</span><h2>Tell us your dream trip.</h2><p class="mb-0">Share your dates, destination and preferences. Our travel team will build a personalised itinerary for you.</p></div>
+  <div class="col-lg-4 text-lg-end"><a href="{% url 'enquiry' %}" class="btn btn-light btn-lg rounded-pill px-4">Plan My Trip <i class="fa-solid fa-arrow-right ms-2"></i></a></div>
+ </div></div>
+</section>
+
+<section class="container py-5">
+ <div class="section-head"><div><span class="eyebrow text-primary">TRAVELLER STORIES</span><h2>What our travellers say</h2></div></div>
+ <div class="row g-4">
+ {% for t in testimonials %}
+  <div class="col-md-4"><div class="testimonial card h-100 p-4"><div class="stars mb-2">★★★★★</div><p>“{{ t.message }}”</p><div class="mt-auto fw-bold">{{ t.name }} <small class="text-muted fw-normal">· {{ t.location }}</small></div></div></div>
+ {% empty %}
+  <div class="col-12"><div class="empty-state">Customer testimonials will appear here after you add them in Admin.</div></div>
+ {% endfor %}
+ </div>
+</section>
+
+<section class="bg-soft py-5">
+ <div class="container">
+  <div class="section-head"><div><span class="eyebrow text-primary">TRAVEL GUIDE</span><h2>Latest from our blog</h2></div><a href="{% url 'blog' %}" class="btn btn-outline-primary rounded-pill">View all</a></div>
+  <div class="row g-4">{% for post in blogs %}<div class="col-md-4"><div class="blog-card card h-100">{% if post.image %}<img onerror="this.onerror=null;this.src='/static/images/travel-placeholder.svg';" src="{{ post.image.url }}" alt="{{ post.title }}">{% endif %}<div class="p-4"><small class="text-muted">{{ post.published_at|date:"d M Y" }}</small><h5 class="mt-2"><a href="{% url 'blog_detail' post.slug %}">{{ post.title }}</a></h5><p class="text-muted">{{ post.excerpt }}</p></div></div></div>{% empty %}<div class="col-12"><div class="empty-state">Add blog posts from the admin dashboard.</div></div>{% endfor %}</div>
+ </div>
+</section>
+{% block extra_js %}
+<script>
+  window.packageSearchUrl = "{% url 'package_search_api' %}";
+  window.packageListUrl = "{% url 'package_list' %}";
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends 'admin_panel/_base.html' %}
+{% load static humanize %}
+{% block title %}Wanderly Holidays • Admin Dashboard{% endblock %}
+{% block content %}
+    <section class="welcome-banner">
+      <div class="welcome-copy">
+        <small>Welcome back,</small>
+        <h1>Hello, Admin! <span>👋</span></h1>
+        <p>Here’s what’s happening with your travel business today.</p>
+        <div class="welcome-date"><i class="fa-regular fa-calendar"></i> {% now "d F Y, l" %} <b>•</b> {% now "h:i A" %}</div>
+      </div>
+      <div class="welcome-photo"></div>
+    </section>
+
+    <section class="stats-grid">
+      <a class="stat-card stat-purple" href="{% url 'admin_section_list' section='bookings' %}">
+        <div class="stat-icon"><i class="fa-solid fa-suitcase"></i></div><div><small>Total Bookings</small><strong>{{ total_bookings }}</strong><span class="trend up"><i class="fa-solid fa-arrow-trend-up"></i> 12% <em>from last month</em></span></div>
+      </a>
+      <a class="stat-card stat-green" href="{% url 'admin_users_list' %}">
+        <div class="stat-icon"><i class="fa-solid fa-users"></i></div><div><small>Total Users</small><strong>{{ total_users }}</strong><span class="trend up"><i class="fa-solid fa-arrow-trend-up"></i> 18% <em>from last month</em></span></div>
+      </a>
+      <a class="stat-card stat-blue" href="{% url 'admin_section_list' section='packages' %}">
+        <div class="stat-icon"><i class="fa-solid fa-cube"></i></div><div><small>Total Packages</small><strong>{{ total_packages }}</strong><span class="trend up"><i class="fa-solid fa-arrow-trend-up"></i> 7% <em>from last month</em></span></div>
+      </a>
+      <a class="stat-card stat-orange" href="{% url 'admin_section_list' section='destinations' %}">
+        <div class="stat-icon"><i class="fa-solid fa-location-dot"></i></div><div><small>Destinations</small><strong>{{ total_destinations }}</strong><span class="trend up"><i class="fa-solid fa-arrow-trend-up"></i> 9% <em>from last month</em></span></div>
+      </a>
+      <div class="stat-card stat-pink">
+        <div class="stat-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div><div><small>Total Revenue</small><strong>₹{{ total_revenue|floatformat:0|intcomma }}</strong><span class="trend up"><i class="fa-solid fa-arrow-trend-up"></i> 15% <em>from last month</em></span></div>
+      </div>
+    </section>
+
+    <section class="content-grid">
+      <div class="panel chart-panel">
+        <div class="panel-head"><div><h2>Bookings Overview</h2></div><select><option>This Month</option><option>Last Month</option><option>This Year</option></select></div>
+        <div class="chart-legend"><span><i class="legend-dot blue-dot"></i>Bookings</span><span><i class="legend-dot green-dot"></i>Revenue (₹)</span></div>
+        <div class="fake-chart">
+          <div class="y-axis"><span>50</span><span>40</span><span>30</span><span>20</span><span>10</span><span>0</span></div>
+          <div class="chart-area">
+            <div class="gridline g1"></div><div class="gridline g2"></div><div class="gridline g3"></div><div class="gridline g4"></div><div class="gridline g5"></div>
+            <svg viewBox="0 0 620 190" preserveAspectRatio="none" aria-label="Bookings trend">
+              <defs><linearGradient id="blueFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3f7cff" stop-opacity=".18"/><stop offset="1" stop-color="#3f7cff" stop-opacity="0"/></linearGradient></defs>
+              <path d="M0 145 L35 115 L68 132 L100 90 L130 108 L160 135 L190 150 L220 126 L250 98 L280 102 L310 76 L340 110 L370 84 L400 104 L430 93 L460 105 L490 74 L520 111 L550 125 L580 70 L620 92 L620 190 L0 190 Z" fill="url(#blueFill)"/>
+              <polyline points="0,145 35,115 68,132 100,90 130,108 160,135 190,150 220,126 250,98 280,102 310,76 340,110 370,84 400,104 430,93 460,105 490,74 520,111 550,125 580,70 620,92" fill="none" stroke="#3f7cff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="0,160 35,168 68,151 100,133 130,148 160,168 190,153 220,139 250,120 280,137 310,106 340,139 370,120 400,140 430,133 460,140 490,113 520,138 550,151 580,109 620,126" fill="none" stroke="#19b56f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div class="x-axis"><span>1 Aug</span><span>4 Aug</span><span>7 Aug</span><span>10 Aug</span><span>13 Aug</span><span>16 Aug</span></div>
+          </div>
+        </div>
+        <div class="chart-summary"><div><small>Total Bookings</small><strong>{{ total_bookings }}</strong><span class="positive">↗ 12%</span></div><div><small>Total Revenue</small><strong>₹{{ total_revenue|floatformat:0|intcomma }}</strong><span class="positive">↗ 15%</span></div><div><small>Avg. Booking Value</small><strong>₹{{ avg_booking_value|floatformat:0|intcomma }}</strong><span class="positive">↗ 8%</span></div></div>
+      </div>
+
+      <div class="panel bookings-table-panel">
+        <div class="panel-head"><h2>Latest Bookings</h2><a href="{% url 'admin_section_list' section='bookings' %}">View All</a></div>
+        <div class="booking-table">
+          <div class="booking-head"><span>BOOKING ID</span><span>CUSTOMER</span><span>PACKAGE</span><span>DATE</span><span>STATUS</span></div>
+          {% for booking in recent_bookings|slice:":5" %}
+          <a class="booking-line" href="{% url 'admin_section_edit' section='bookings' pk=booking.id %}">
+            <strong>BK-{{ booking.id|stringformat:"05d" }}</strong>
+            <span>{{ booking.traveler_name|default:booking.user.username|truncatechars:18 }}</span>
+            <span>{{ booking.package.name|truncatechars:20 }}</span>
+            <span>{{ booking.created_at|date:"d M Y" }}</span>
+            <em class="status status-{{ booking.status }}">{{ booking.status|title }}</em>
+          </a>
+          {% empty %}<div class="empty">No bookings yet.</div>{% endfor %}
+        </div>
+        <a class="table-footer-link" href="{% url 'admin_section_list' section='bookings' %}">View All Bookings <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+
+      <div class="panel action-panel">
+        <div class="panel-head"><h2>Action Center</h2></div>
+        <a class="action-item action-blue" href="{% url 'admin_section_list' section='bookings' %}"><span><i class="fa-regular fa-calendar-check"></i></span><div><strong>Pending Bookings</strong><small>{{ pending_bookings }} bookings are awaiting confirmation</small></div><i class="fa-solid fa-arrow-right"></i></a>
+        <a class="action-item action-yellow" href="{% url 'admin_section_list' section='reviews' %}"><span><i class="fa-regular fa-star"></i></span><div><strong>Unapproved Reviews</strong><small>{{ pending_reviews|stringformat:"02d" }} reviews are pending approval</small></div><i class="fa-solid fa-arrow-right"></i></a>
+        <a class="action-item action-green" href="{% url 'admin_section_list' section='enquiries' %}"><span><i class="fa-regular fa-comments"></i></span><div><strong>New Enquiries</strong><small>{{ pending_enquiries|stringformat:"02d" }} new enquiries received</small></div><i class="fa-solid fa-arrow-right"></i></a>
+        <a class="action-item action-red" href="{% url 'admin_section_list' section='packages' %}"><span><i class="fa-solid fa-ticket"></i></span><div><strong>Package Management</strong><small>{{ total_packages }} packages currently available</small></div><i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+
+      <div class="panel packages-panel">
+        <div class="panel-head"><h2>Top Packages</h2><a href="{% url 'admin_section_list' section='packages' %}">View All</a></div>
+        <div class="package-grid">
+          {% for package in top_packages|slice:":3" %}
+          <a class="package-card" href="{% url 'admin_section_edit' section='packages' pk=package.id %}">
+            <div class="package-image">{% if package.image_src %}<img src="{{ package.image_src }}" alt="{{ package.name }}">{% else %}<div class="image-placeholder"><i class="fa-solid fa-mountain-sun"></i></div>{% endif %}</div>
+            <div class="package-info"><strong>{{ package.name|truncatechars:23 }}</strong><small>{{ package.duration_days }} Nights / {{ package.duration_days|add:"1" }} Days</small><b>₹{{ package.effective_price|floatformat:0|intcomma }}</b><span>{{ package.available_seats|default:"0" }} Seats Available</span></div>
+          </a>
+          {% empty %}<div class="empty">Add packages to see your catalogue here.</div>{% endfor %}
+        </div>
+      </div>
+
+      <div class="panel health-panel">
+        <div class="panel-head"><h2>System Health</h2></div>
+        <div class="health-grid">
+          <div class="health-item good"><span><i class="fa-solid fa-server"></i></span><div><strong>Server Status</strong><small>Online</small></div></div>
+          <div class="health-item good"><span><i class="fa-solid fa-database"></i></span><div><strong>Database</strong><small>Healthy</small></div></div>
+          <div class="health-item purple"><span><i class="fa-solid fa-wave-square"></i></span><div><strong>Site Uptime</strong><small>99.9%</small></div></div>
+          <div class="health-item blue"><span><i class="fa-solid fa-cloud-arrow-up"></i></span><div><strong>Today's Backup</strong><small>Completed</small></div></div>
+        </div>
+      </div>
+
+      <div class="panel quick-panel">
+        <div class="panel-head"><h2>Quick Actions</h2></div>
+        <div class="quick-grid">
+          <a href="{% url 'admin_section_add' section='packages' %}"><i class="fa-solid fa-plus"></i><span>Add Package</span></a>
+          <a href="{% url 'admin_section_add' section='destinations' %}"><i class="fa-solid fa-location-dot"></i><span>Add Destination</span></a>
+          <a href="{% url 'admin_section_list' section='packages' %}"><i class="fa-regular fa-images"></i><span>Manage Images</span></a>
+          <a href="{% url 'admin_section_list' section='bookings' %}"><i class="fa-regular fa-calendar"></i><span>View Bookings</span></a>
+          <a href="{% url 'admin_section_list' section='newsletter' %}"><i class="fa-regular fa-paper-plane"></i><span>Newsletter</span></a>
+          <a href="{% url 'admin_users_list' %}"><i class="fa-solid fa-gear"></i><span>Manage Users</span></a>
+        </div>
+      </div>
+    </section>
+{% endblock %}

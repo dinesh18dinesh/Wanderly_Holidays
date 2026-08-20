@@ -1,0 +1,40 @@
+{% extends 'admin_panel/_base.html' %}
+{% block title %}{% if mode == 'add' %}Add Traveler{% else %}Edit Traveler{% endif %} • Wanderly Admin{% endblock %}
+{% block content %}
+<section class="panel-page">
+  <div class="page-header">
+    <div>
+      <div class="breadcrumb"><a href="{% url 'admin_dashboard' %}">Dashboard</a><i class="fa-solid fa-chevron-right"></i><a href="{% url 'admin_section_list' section='bookings' %}">Bookings</a><i class="fa-solid fa-chevron-right"></i><a href="{% url 'admin_travelers_list' pk=booking.pk %}">{{ booking.booking_id }} Travelers</a><i class="fa-solid fa-chevron-right"></i><span>{% if mode == 'add' %}Add New{% else %}Edit{% endif %}</span></div>
+      <h1><i class="fa-solid fa-user-plus"></i> {% if mode == 'add' %}Add Traveler to {{ booking.booking_id }}{% else %}Edit Traveler{% endif %}</h1>
+    </div>
+    <div class="page-actions">
+      <a class="btn-secondary" href="{% url 'admin_travelers_list' pk=booking.pk %}"><i class="fa-solid fa-arrow-left"></i> Back to Travelers</a>
+    </div>
+  </div>
+
+  <div class="panel form-panel">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="form-error-banner">{{ form.non_field_errors }}</div>{% endif %}
+      <div class="form-grid">
+        {% for field in form %}
+        <div class="form-field {% if field.field.widget.input_type == 'checkbox' %}form-field-check{% endif %}">
+          {% if field.field.widget.input_type == 'checkbox' %}
+            <label class="check-label">{{ field }} {{ field.label }}</label>
+          {% else %}
+            <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span class="req">*</span>{% endif %}</label>
+            {{ field }}
+          {% endif %}
+          {% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}
+          {% if field.errors %}<small class="field-error">{{ field.errors|striptags }}</small>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      <div class="form-footer">
+        <a class="btn-secondary" href="{% url 'admin_travelers_list' pk=booking.pk %}">Cancel</a>
+        <button class="btn-primary" type="submit"><i class="fa-solid fa-floppy-disk"></i> {% if mode == 'add' %}Add Traveler{% else %}Save Changes{% endif %}</button>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

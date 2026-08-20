@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-sm p-4">
+                <h3 class="mb-3 text-center">Welcome Back</h3>
+                <ul class="nav nav-pills nav-fill mb-4 login-role-tabs" role="tablist">
+                    <li class="nav-item">
+                        <button type="button" class="nav-link active" data-role="user">
+                            <i class="fa-solid fa-user"></i> Traveler Login
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link" data-role="admin">
+                            <i class="fa-solid fa-user-shield"></i> Admin Login
+                        </button>
+                    </li>
+                </ul>
+                <p class="text-center text-muted small mb-3" id="loginRoleHint">Login as a traveler to book trips, manage bookings and your profile.</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" name="username" class="form-control" required autofocus>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                    {% if form.errors %}
+                    <div class="alert alert-danger py-2">Invalid username or password.</div>
+                    {% endif %}
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </form>
+                <p class="text-center mt-3 mb-0">Don't have an account? <a href="{% url 'register' %}">Sign up</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.querySelectorAll('.login-role-tabs .nav-link').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.login-role-tabs .nav-link').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    var hint = document.getElementById('loginRoleHint');
+    if (btn.dataset.role === 'admin') {
+      hint.textContent = 'Login with your admin/staff account to reach the Wanderly admin dashboard.';
+    } else {
+      hint.textContent = 'Login as a traveler to book trips, manage bookings and your profile.';
+    }
+  });
+});
+</script>
+{% endblock %}

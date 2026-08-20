@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% block title %}{{ destination.name }} Travel Guide{% endblock %}
+{% block extra_css %}
+<style>
+.destination-page{background:#f7f8fb}
+.dest-hero{height:540px;position:relative;overflow:hidden;border-radius:0 0 36px 36px}
+.dest-hero img{width:100%;height:100%;object-fit:cover}
+.dest-gallery-main{position:absolute;inset:0}
+.dest-gallery-main img{transition:opacity .25s ease,transform .45s ease}
+.dest-gallery-main:hover img{transform:scale(1.01)}
+.dest-gallery-controls{position:absolute;right:28px;bottom:28px;display:flex;gap:8px;z-index:3}
+.dest-gallery-controls button{border:0;background:rgba(255,255,255,.94);width:42px;height:42px;border-radius:50%;box-shadow:0 8px 20px rgba(0,0,0,.15)}
+.dest-gallery-count{position:absolute;left:28px;bottom:30px;z-index:3;background:rgba(10,20,35,.72);color:#fff;padding:7px 11px;border-radius:999px;font-size:.74rem}
+.dest-gallery-thumbs{position:absolute;right:28px;top:28px;z-index:3;display:flex;gap:7px}
+.dest-gallery-thumb{width:62px;height:48px;border:2px solid transparent;padding:0;border-radius:9px;overflow:hidden;background:#fff}
+.dest-gallery-thumb.active{border-color:#ffd34d}
+.dest-gallery-thumb img{width:100%;height:100%;object-fit:cover}
+.dest-overlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,17,34,.82),rgba(5,17,34,.34),rgba(5,17,34,.18))}
+.dest-content{position:absolute;inset:0;display:flex;align-items:end;color:#fff;padding:55px 0}
+.dest-kicker{font-size:.72rem;letter-spacing:.18em;font-weight:900;color:#ffd34d}
+.dest-title{font-size:clamp(3rem,7vw,6rem);font-weight:950;letter-spacing:-.06em;line-height:.9;margin:12px 0}
+.dest-sub{font-size:1.05rem;max-width:720px;color:#e6edf5}
+.dest-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.dest-actions .btn{padding:11px 18px}
+.dest-floating{margin-top:-42px;position:relative;z-index:4}
+.dest-stats{background:#fff;border-radius:22px;box-shadow:0 16px 40px rgba(16,33,58,.1);display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden}
+.dest-stat{padding:22px;border-right:1px solid #edf0f5}.dest-stat:last-child{border-right:0}.dest-stat i{color:var(--brand);font-size:1.1rem;margin-right:8px}.dest-stat small,.dest-stat strong{display:block}.dest-stat small{font-size:.7rem;color:#667085;margin-top:7px}.dest-stat strong{font-size:.88rem}
+.dest-section{padding:70px 0}
+.dest-section-title{font-size:clamp(1.9rem,3vw,2.7rem);font-weight:900;letter-spacing:-.045em}
+.dest-copy{font-size:1rem;line-height:1.85;color:#667085}
+.dest-highlight{background:#fff;border:1px solid #e8ebf0;border-radius:20px;padding:22px;height:100%;transition:.22s}.dest-highlight:hover{transform:translateY(-4px);box-shadow:0 16px 32px rgba(16,33,58,.08)}
+.dest-highlight-icon{width:44px;height:44px;border-radius:14px;background:#fff1f2;color:var(--brand);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.activity-card{border-radius:20px;overflow:hidden;background:#fff;border:1px solid #e8ebf0;height:100%}
+.activity-card .activity-img{height:180px;background:#dfe5ec;overflow:hidden}.activity-card img{width:100%;height:100%;object-fit:cover;transition:.4s}.activity-card:hover img{transform:scale(1.06)}
+.activity-body{padding:18px}.activity-body h5{font-weight:850}.activity-body p{font-size:.8rem;color:#667085}
+.guide-panel{background:#10213a;color:#fff;border-radius:28px;padding:32px}.guide-points{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:24px}.guide-point{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:17px}.guide-point i{color:#ffd34d;margin-right:8px}.guide-point strong{display:block;font-size:.82rem;margin-bottom:5px}.guide-point span{font-size:.73rem;color:#cbd5e1}
+.dest-package{border:1px solid #e8ebf0;border-radius:20px;overflow:hidden;background:#fff;height:100%;transition:.22s}.dest-package:hover{transform:translateY(-5px);box-shadow:0 16px 32px rgba(16,33,58,.09)}.dest-package img{width:100%;height:210px;object-fit:cover}.dest-package-body{padding:18px}.dest-package-body h5{font-weight:850}
+.map-card{border-radius:24px;background:#e9f0f7;min-height:300px;display:flex;align-items:center;justify-content:center;text-align:center;color:#52627a;overflow:hidden;position:relative}
+.map-card iframe{width:100%;height:100%;min-height:300px;border:0;display:block}
+.map-card .map-caption{position:absolute;left:16px;bottom:16px;background:#fff;border-radius:14px;padding:10px 16px;box-shadow:0 8px 20px rgba(16,33,58,.15);font-size:.78rem;color:#10213a}
+.map-card .map-caption strong{display:block;font-size:.85rem}
+@media(max-width:991px){.dest-stats{grid-template-columns:repeat(2,1fr)}.dest-stat:nth-child(2){border-right:0}.dest-stat:nth-child(-n+2){border-bottom:1px solid #edf0f5}}
+@media(max-width:575px){.dest-hero{height:470px;border-radius:0 0 25px 25px}.dest-content{padding:30px 0}.dest-title{font-size:3.2rem}.dest-stats{grid-template-columns:1fr 1fr}.dest-stat{padding:15px}.dest-section{padding:48px 0}.guide-points{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="destination-page">
+<section class="dest-hero">
+ <div class="dest-gallery-main"><img id="destGalleryImage" src="{{ destination.gallery_display_list.0 }}" alt="{{ destination.name }}" loading="eager" onerror="this.onerror=null;this.src='/static/images/travel-placeholder.svg';"></div>
+ <div class="dest-gallery-thumbs">
+  {% for image in destination.gallery_display_list %}
+   <button type="button" class="dest-gallery-thumb {% if forloop.first %}active{% endif %}" data-image="{{ image }}" data-index="{{ forloop.counter0 }}"><img src="{{ image }}" alt="{{ destination.name }} gallery {{ forloop.counter }}"></button>
+  {% endfor %}
+ </div>
+ <div class="dest-gallery-count" id="destGalleryCount">1 / {{ destination.gallery_display_list|length }}</div>
+ <div class="dest-gallery-controls"><button type="button" id="destPrev"><i class="fa-solid fa-chevron-left"></i></button><button type="button" id="destNext"><i class="fa-solid fa-chevron-right"></i></button></div>
+ <div class="dest-overlay"></div>
+ <div class="dest-content"><div class="container">
+  <span class="dest-kicker">{{ destination.country }} · TRAVEL GUIDE</span>
+  <h1 class="dest-title">{{ destination.name }}</h1>
+  <p class="dest-sub">{{ destination.description }}</p>
+  <div class="dest-actions"><a href="#packages" class="btn btn-primary rounded-pill">Explore Packages <i class="fa-solid fa-arrow-down ms-2"></i></a><a href="{% url 'enquiry' %}" class="btn btn-light rounded-pill">Plan My Trip</a></div>
+ </div></div>
+</section>
+
+<div class="container dest-floating">
+ <div class="dest-stats">
+  <div class="dest-stat"><div><i class="fa-solid fa-location-dot"></i><strong>{{ destination.city }}, {{ destination.country }}</strong></div><small>Location</small></div>
+  <div class="dest-stat"><div><i class="fa-solid fa-calendar-days"></i><strong>{{ destination.best_time_to_visit|default:"Ask our travel team" }}</strong></div><small>Best time to visit</small></div>
+  <div class="dest-stat"><div><i class="fa-solid fa-suitcase-rolling"></i><strong>{{ packages|length }} curated trips</strong></div><small>Ways to explore</small></div>
+  <div class="dest-stat"><div><i class="fa-solid fa-map"></i><strong>Travel planning</strong></div><small>Guidance available</small></div>
+ </div>
+</div>
+
+<div class="container">
+ <section class="dest-section">
+  <div class="row g-5 align-items-start">
+   <div class="col-lg-7">
+    <span class="section-kicker">Discover {{ destination.name }}</span>
+    <h2 class="dest-section-title mt-2">More than a destination — a complete experience</h2>
+    <p class="dest-copy mt-3">{{ destination.description }}</p>
+    <p class="dest-copy">Use this guide to understand the destination, discover experiences and choose a package that matches your travel style.</p>
+   </div>
+   <div class="col-lg-5"><div class="guide-panel"><span class="dest-kicker">Quick planning</span><h4 class="fw-bold mt-2">Ready to explore?</h4><p class="text-white-50 small">Compare the available journeys for {{ destination.name }} or tell our travel team what kind of holiday you want.</p><a href="#packages" class="btn btn-light rounded-pill mt-2">See Packages</a></div></div>
+  </div>
+ </section>
+
+ <section class="dest-section pt-0">
+  <span class="section-kicker">Why go</span><h2 class="dest-section-title mt-2">Destination highlights</h2>
+  <div class="row g-3 mt-3">
+   {% for item in destination.highlights_list %}
+    <div class="col-md-4"><div class="dest-highlight"><div class="dest-highlight-icon"><i class="fa-solid fa-star"></i></div><h6 class="fw-bold">{{ item }}</h6><p class="small text-muted mb-0">A memorable part of your {{ destination.name }} experience.</p></div></div>
+   {% empty %}
+    <div class="col-md-4"><div class="dest-highlight"><div class="dest-highlight-icon"><i class="fa-solid fa-camera"></i></div><h6 class="fw-bold">Scenic moments</h6><p class="small text-muted mb-0">Discover memorable landscapes and local experiences.</p></div></div>
+    <div class="col-md-4"><div class="dest-highlight"><div class="dest-highlight-icon"><i class="fa-solid fa-utensils"></i></div><h6 class="fw-bold">Local culture</h6><p class="small text-muted mb-0">Make time for regional food, traditions and authentic encounters.</p></div></div>
+    <div class="col-md-4"><div class="dest-highlight"><div class="dest-highlight-icon"><i class="fa-solid fa-route"></i></div><h6 class="fw-bold">Easy planning</h6><p class="small text-muted mb-0">Choose from curated packages and practical itineraries.</p></div></div>
+   {% endfor %}
+  </div>
+ </section>
+
+ <section class="dest-section pt-0">
+  <span class="section-kicker">Experience it</span><h2 class="dest-section-title mt-2">Things to do</h2>
+  <div class="row g-4 mt-2">
+   {% for item in destination.things_to_do_list %}
+    <div class="col-md-4"><div class="activity-card"><div class="activity-img"><img src="{{ destination.image_src }}" alt="{{ item }}" loading="lazy"></div><div class="activity-body"><h5>{{ item }}</h5><p class="mb-0">Add this experience to your holiday plan and make time to enjoy the destination at your own pace.</p></div></div></div>
+   {% empty %}
+    <div class="col-md-4"><div class="activity-card"><div class="activity-img"><img src="{{ destination.image_src }}" alt="{{ destination.name }} experience"></div><div class="activity-body"><h5>Explore local attractions</h5><p class="mb-0">Discover the places and experiences that make {{ destination.name }} special.</p></div></div></div>
+    <div class="col-md-4"><div class="activity-card"><div class="activity-img"><img src="{{ destination.image_src }}" alt="{{ destination.name }} culture"></div><div class="activity-body"><h5>Try local flavours</h5><p class="mb-0">Make time for local food and regional experiences.</p></div></div></div>
+    <div class="col-md-4"><div class="activity-card"><div class="activity-img"><img src="{{ destination.image_src }}" alt="{{ destination.name }} sightseeing"></div><div class="activity-body"><h5>Enjoy sightseeing</h5><p class="mb-0">Build a relaxed sightseeing day around the destination's highlights.</p></div></div></div>
+   {% endfor %}
+  </div>
+ </section>
+
+ <section class="dest-section pt-0">
+  <div class="guide-panel">
+   <span class="dest-kicker">Plan with confidence</span><h2 class="dest-section-title text-white mt-2">Your {{ destination.name }} travel guide</h2>
+   <p class="text-white-50 mt-2 mb-0">{{ destination.travel_guide|default:"Check the seasonal conditions before travelling, choose comfortable clothing and footwear, keep identification and booking documents accessible, and leave time for local food and cultural experiences. Our travel team can help you plan the right pace for your trip." }}</p>
+   <div class="guide-points">
+    <div class="guide-point"><i class="fa-solid fa-calendar-days"></i><strong>Best time</strong><span>{{ destination.best_time_to_visit|default:"Talk to our travel team for seasonal recommendations." }}</span></div>
+    <div class="guide-point"><i class="fa-solid fa-shirt"></i><strong>What to pack</strong><span>Comfortable clothing, essentials, documents and destination-ready footwear.</span></div>
+    <div class="guide-point"><i class="fa-solid fa-car"></i><strong>Getting around</strong><span>Choose the transport style that matches your package and daily plan.</span></div>
+    <div class="guide-point"><i class="fa-solid fa-utensils"></i><strong>Food & culture</strong><span>Leave room in your itinerary for local flavours and cultural experiences.</span></div>
+   </div>
+  </div>
+ </section>
+
+ <section class="dest-section pt-0">
+  <div class="row g-4 align-items-stretch">
+   <div class="col-lg-7">
+    <div class="map-card h-100">
+     {% if destination.map_embed_url %}
+     <iframe src="{{ destination.map_embed_url }}" loading="lazy" title="Map of {{ destination.city }}, {{ destination.country }}"></iframe>
+     <div class="map-caption"><strong>{{ destination.city }}, {{ destination.country }}</strong><a href="{{ destination.map_link_url }}" target="_blank" rel="noopener">View larger map</a></div>
+     {% else %}
+     <div><i class="fa-solid fa-location-dot fa-2x text-primary mb-3"></i><h5 class="fw-bold">Explore the location</h5><p class="small mb-0">{{ destination.city }}, {{ destination.country }}</p></div>
+     {% endif %}
+    </div>
+   </div>
+   <div class="col-lg-5"><div class="dest-highlight h-100"><span class="section-kicker">Need a hand?</span><h3 class="dest-section-title mt-2">Build your ideal holiday</h3><p class="dest-copy small">Tell us your dates, travellers and preferred experience. Our travel team can help shape a trip around your plans.</p><a href="{% url 'enquiry' %}" class="btn btn-primary rounded-pill">Plan My Trip</a></div></div>
+  </div>
+ </section>
+
+ <section id="packages" class="dest-section pt-0">
+  <span class="section-kicker">Curated for you</span><h2 class="dest-section-title mt-2">Explore {{ destination.name }} packages</h2>
+  <p class="text-muted">Compare the available journeys, then open a package to see the complete itinerary, inclusions, travel insurance, guide and reviews.</p>
+  <div class="row g-4 mt-2">
+   {% for package in packages %}
+   <div class="col-md-6 col-lg-4"><a class="dest-package d-block" href="{{ package.get_absolute_url }}">
+    {% if package.image_src %}<img src="{{ package.image_src }}" alt="{{ package.name }}" loading="lazy" onerror="this.onerror=null;this.src='/static/images/travel-placeholder.svg';">{% endif %}
+    <div class="dest-package-body"><span class="category-pill">{{ package.get_package_type_display }}</span><h5 class="mt-2">{{ package.name }}</h5><div class="d-flex justify-content-between align-items-center"><span class="small text-muted">{{ package.duration_days }} Days</span><strong class="text-primary">₹{{ package.effective_price }}</strong></div><div class="btn btn-outline-primary rounded-pill btn-sm mt-3">View Journey <i class="fa-solid fa-arrow-right ms-1"></i></div></div>
+   </a></div>
+   {% empty %}
+   <div class="col-12"><div class="empty-state">Explore more packages as they are added to this destination.</div></div>
+   {% endfor %}
+  </div>
+ </section>
+</div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ const thumbs=[...document.querySelectorAll('.dest-gallery-thumb')], img=document.getElementById('destGalleryImage'), count=document.getElementById('destGalleryCount');
+ let index=0;
+ function show(i){
+   if(!thumbs.length)return;
+   index=(i+thumbs.length)%thumbs.length;
+   img.style.opacity='.35';
+   const nextSrc=thumbs[index].dataset.image;
+   img.onload=()=>{img.style.opacity='1';};
+   img.onerror=()=>{
+     img.onerror=null;
+     // Never fall back to a generic travel image; try another image
+     // belonging to this same destination instead.
+     if(thumbs.length>1){ show(index+1); }
+   };
+   img.src=nextSrc;
+   count.textContent=(index+1)+' / '+thumbs.length;
+   thumbs.forEach((t,n)=>t.classList.toggle('active',n===index));
+ }
+ thumbs.forEach((t,i)=>t.addEventListener('click',()=>show(i)));
+ document.getElementById('destPrev')?.addEventListener('click',()=>show(index-1));
+ document.getElementById('destNext')?.addEventListener('click',()=>show(index+1));
+});
+</script>
+{% endblock %}

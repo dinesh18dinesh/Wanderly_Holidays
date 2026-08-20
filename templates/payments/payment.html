@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Secure Payment{% endblock %}
+{% block content %}
+<div class="container py-5"><div class="row justify-content-center"><div class="col-lg-6"><div class="card border-0 shadow-sm p-4 p-lg-5">
+<div class="text-center mb-4"><div class="secure-icon"><i class="fa-solid fa-lock"></i></div><h2>Secure checkout</h2><p class="text-muted">Complete payment for {{ booking.package.name }}</p></div>
+<div class="summary-box mb-4"><div class="d-flex justify-content-between"><span>Travellers</span><b>{{ booking.number_of_travelers }}</b></div>{% if booking.discount_amount %}<div class="d-flex justify-content-between text-success"><span>Discount</span><b>- ₹{{ booking.discount_amount }}</b></div>{% endif %}<hr><div class="d-flex justify-content-between fs-5"><b>Total</b><b>₹{{ booking.total_amount }}</b></div></div>
+{% if demo_mode %}
+<div class="alert alert-warning small">Demo payment mode is active because Razorpay keys are not configured. This button simulates a successful payment for development.</div>
+<a href="{% url 'payment_success' %}" class="btn btn-success btn-lg w-100 rounded-pill">Simulate Successful Payment</a>
+<a href="{% url 'payment_failed' %}" class="btn btn-outline-danger w-100 rounded-pill mt-2">Cancel</a>
+{% else %}
+<button id="rzp-button" class="btn btn-primary btn-lg w-100 rounded-pill">Pay ₹{{ booking.total_amount }}</button>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+const options={key:"{{ razorpay_key }}",amount:"{{ amount_paise }}",currency:"INR",name:"Wanderly Travel & Holidays",description:"Booking {{ booking.booking_id }}",order_id:"{{ order_id }}",prefill:{name:"{{ request.user.get_full_name }}",email:"{{ request.user.email }}"},handler:function(r){const f=new FormData();f.append('razorpay_payment_id',r.razorpay_payment_id);f.append('razorpay_order_id',r.razorpay_order_id);f.append('razorpay_signature',r.razorpay_signature);fetch("{% url 'verify_payment' %}",{method:"POST",headers:{"X-CSRFToken":"{{ csrf_token }}"},body:f}).then(x=>x.json()).then(x=>{if(x.ok)location.href=x.redirect;else alert(x.error||"Payment verification failed.");});}};document.getElementById("rzp-button").onclick=()=>new Razorpay(options).open();
+</script>
+{% endif %}
+</div></div></div></div>
+{% endblock %}

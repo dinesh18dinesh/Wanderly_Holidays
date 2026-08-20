@@ -1,0 +1,90 @@
+{% extends 'admin_panel/_base.html' %}
+{% load humanize %}
+{% block title %}{{ config.title }} • Wanderly Admin{% endblock %}
+{% block content %}
+<section class="panel-page">
+  <div class="page-header">
+    <div>
+      <div class="breadcrumb"><a href="{% url 'admin_dashboard' %}">Dashboard</a><i class="fa-solid fa-chevron-right"></i><span>{{ config.title }}</span></div>
+      <h1><i class="{{ config.icon }}"></i> {{ config.title }} <span class="count-pill">{{ total_count }}</span></h1>
+    </div>
+    <div class="page-actions">
+      <form class="search-form" method="get">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="search" name="q" value="{{ query }}" placeholder="Search {{ config.title|lower }}...">
+      </form>
+      <a class="btn-primary" href="{% url 'admin_section_add' section=section %}"><i class="fa-solid fa-plus"></i> Add {{ config.singular }}</a>
+    </div>
+  </div>
+
+  <div class="panel data-panel">
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            {% for attr, label, kind in config.list_fields %}<th>{{ label }}</th>{% endfor %}
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+          <tr>
+            {% for cell in row.cells %}
+            <td>
+              {% if cell.kind == 'image' %}
+                {% if cell.value %}<img class="row-thumb" src="{{ cell.value }}" alt="">{% else %}<div class="row-thumb placeholder"><i class="fa-solid fa-image"></i></div>{% endif %}
+              {% elif cell.kind == 'badge' %}
+                <span class="badge badge-{{ cell.badge_class }}">{{ cell.value|title }}</span>
+              {% elif cell.kind == 'boolean' %}
+                {% if cell.value %}<span class="badge badge-green"><i class="fa-solid fa-check"></i> Yes</span>{% else %}<span class="badge badge-gray"><i class="fa-solid fa-xmark"></i> No</span>{% endif %}
+              {% elif cell.kind == 'currency' %}
+                ₹{{ cell.value|floatformat:0|intcomma }}
+              {% elif cell.kind == 'percent' %}
+                {{ cell.value }}%
+              {% elif cell.kind == 'date' %}
+                {{ cell.value|date:"d M Y"|default:"—" }}
+              {% elif cell.kind == 'datetime' %}
+                {{ cell.value|date:"d M Y, h:i A"|default:"—" }}
+              {% elif cell.kind == 'email' %}
+                {% if cell.value %}<a class="cell-link" href="mailto:{{ cell.value }}">{{ cell.value }}</a>{% else %}—{% endif %}
+              {% elif cell.kind == 'stars' %}
+                <span class="stars">{% for i in "12345" %}<i class="fa-solid fa-star{% if forloop.counter > cell.value %} star-off{% endif %}"></i>{% endfor %}</span>
+              {% elif cell.kind == 'truncate' %}
+                {{ cell.value|truncatechars:60 }}
+              {% elif cell.kind == 'count' %}
+                {{ cell.value }}
+              {% else %}
+                {{ cell.value|default:"—" }}
+              {% endif %}
+            </td>
+            {% endfor %}
+            <td class="col-actions">
+              <div class="row-actions">
+                {% if section == 'bookings' %}
+                <a class="row-action" title="Travelers" href="{% url 'admin_travelers_list' pk=row.obj.pk %}"><i class="fa-solid fa-users"></i></a>
+                {% endif %}
+                <a class="row-action" title="Edit" href="{% url 'admin_section_edit' section=section pk=row.obj.pk %}"><i class="fa-solid fa-pen"></i></a>
+                <form method="post" action="{% url 'admin_section_delete' section=section pk=row.obj.pk %}" onsubmit="return confirm('Delete this {{ config.singular|lower }}? This cannot be undone.');">
+                  {% csrf_token %}
+                  <button class="row-action row-action-danger" type="submit" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="{{ config.list_fields|length|add:1 }}" class="empty-row">No {{ config.title|lower }} found{% if query %} for "{{ query }}"{% endif %}. <a href="{% url 'admin_section_add' section=section %}">Add the first one</a>.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="pagination">
+      {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}"><i class="fa-solid fa-chevron-left"></i></a>{% endif %}
+      <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}"><i class="fa-solid fa-chevron-right"></i></a>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

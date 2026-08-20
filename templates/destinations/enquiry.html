@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Plan Your Trip{% endblock %}
+{% block content %}
+<div class="page-hero"><div class="container"><span class="eyebrow text-white">PERSONALISED HOLIDAYS</span><h1>Tell us about your dream trip</h1><p>Our travel team can create a holiday around your dates, budget and interests.</p></div></div>
+<div class="container py-5"><div class="row g-5">
+ <div class="col-lg-7"><div class="card border-0 shadow-sm p-4 p-lg-5"><h3>Request a free itinerary</h3><p class="text-muted">Share a few details and we'll get back to you.</p><form method="post">{% csrf_token %}<div class="row g-3">{% for field in form %}<div class="{% if field.name == 'message' %}col-12{% else %}col-md-6{% endif %}"><label class="form-label">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}</div>{% endfor %}</div><button class="btn btn-primary btn-lg rounded-pill mt-4 px-4">Send Enquiry</button></form></div></div>
+ <div class="col-lg-5"><div class="info-panel"><h4>Why plan with us?</h4><div class="why-item"><i class="fa-solid fa-route"></i><div><b>Tailor-made itinerary</b><p>Choose the pace, stays and experiences you prefer.</p></div></div><div class="why-item"><i class="fa-solid fa-headset"></i><div><b>Travel expert support</b><p>Get help before and during your trip.</p></div></div><div class="why-item"><i class="fa-solid fa-hotel"></i><div><b>Complete arrangements</b><p>Hotels, transfers, sightseeing and more can be coordinated.</p></div></div><div class="why-item"><i class="fa-solid fa-lock"></i><div><b>Secure booking</b><p>Your enquiry and account details stay protected.</p></div></div></div></div>
+</div></div>
+{% endblock %}

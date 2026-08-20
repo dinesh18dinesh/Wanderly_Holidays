@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Holiday Packages{% endblock %}
+{% block content %}
+<div class="page-hero"><div class="container"><span class="eyebrow text-white">CURATED EXPERIENCES</span><h1>Holiday Packages</h1><p>Explore India and international tours by destination, theme, budget and duration.</p></div></div>
+<div class="container py-5">
+ <form method="get" class="filter-panel mb-5">
+  <div class="row g-3 align-items-end">
+   <div class="col-lg-4"><label>Search</label><input name="q" value="{{ request.GET.q }}" class="form-control" placeholder="Bali, Kerala, Europe..."></div>
+   <div class="col-md-3 col-lg-2"><label>Travel style</label><select name="type" class="form-select"><option value="">All styles</option>{% for value,label in package_types %}<option value="{{ value }}" {% if selected_type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+   <div class="col-md-3 col-lg-2"><label>Min price</label><input type="number" name="min_price" value="{{ request.GET.min_price }}" class="form-control" placeholder="₹"></div>
+   <div class="col-md-3 col-lg-2"><label>Max price</label><input type="number" name="max_price" value="{{ request.GET.max_price }}" class="form-control" placeholder="₹"></div>
+   <div class="col-md-3 col-lg-2"><label>Duration</label><input type="number" name="duration" value="{{ request.GET.duration }}" class="form-control" placeholder="Days"></div>
+   <div class="col-md-3 col-lg-2"><label>Sort</label><select name="sort" class="form-select"><option value="popular" {% if sort == 'popular' %}selected{% endif %}>Popular</option><option value="price_low" {% if sort == 'price_low' %}selected{% endif %}>Price: low to high</option><option value="price_high" {% if sort == 'price_high' %}selected{% endif %}>Price: high to low</option><option value="duration" {% if sort == 'duration' %}selected{% endif %}>Shortest first</option></select></div>
+   <div class="col-md-3 col-lg-2"><button class="btn btn-primary w-100">Search</button></div>
+  </div>
+ </form>
+
+ <div class="d-flex justify-content-between align-items-center mb-3"><div class="text-muted">{{ page_obj.paginator.count }} tours found</div><a href="{% url 'enquiry' %}" class="small fw-bold">Need a custom tour?</a></div>
+ <div class="row g-4">
+ {% for package in page_obj %}
+  <div class="col-md-6 col-lg-4">
+   <div class="package-card card h-100">
+    <div class="package-image-wrap">{% if package.image_src %}<img onerror="this.onerror=null;this.src='/static/images/travel-placeholder.svg';" src="{{ package.image_src }}" alt="{{ package.name }}" loading="lazy">{% else %}<div class="placeholder-img"><i class="fa-solid fa-image"></i></div>{% endif %}{% if package.discount_percent %}<span class="discount-badge">{{ package.discount_percent }}% OFF</span>{% endif %}{% if user.is_authenticated %}<a href="{% url 'toggle_wishlist' package.slug %}" class="heart-btn"><i class="fa-regular fa-heart"></i></a>{% endif %}</div>
+    <div class="card-body d-flex flex-column">
+     <span class="category-pill">{{ package.get_package_type_display }}</span>
+     <h5 class="mt-2"><a href="{{ package.get_absolute_url }}">{{ package.name }}</a></h5>
+     <p class="small text-muted"><i class="fa-solid fa-location-dot"></i> {{ package.destination.city }}, {{ package.destination.country }}</p>
+     <div class="rating-row"><span class="stars">★★★★★</span> {{ package.average_rating|floatformat:1 }} <span class="ms-auto"><i class="fa-regular fa-clock"></i> {{ package.duration_days }} days</span></div>
+     <p class="small text-muted mt-3 mb-2">{{ package.description|truncatechars:100 }}</p>
+     <div class="price-row mt-auto"><div><small>From</small><strong>₹{{ package.effective_price }}</strong>{% if package.discount_price %}<del>₹{{ package.price }}</del>{% endif %}</div><a href="{{ package.get_absolute_url }}" class="btn btn-primary rounded-pill btn-sm">View Details</a></div>
+    </div>
+   </div>
+  </div>
+ {% empty %}<div class="col-12"><div class="empty-state py-5"><i class="fa-solid fa-compass fa-2x mb-3"></i><h4>No packages found</h4><p>Try another destination or <a href="{% url 'enquiry' %}">ask us to create a custom trip</a>.</p></div></div>{% endfor %}
+ </div>
+ {% include 'includes/pagination.html' %}
+</div>
+{% endblock %}

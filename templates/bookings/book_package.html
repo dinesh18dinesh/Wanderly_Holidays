@@ -1,0 +1,1477 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Book {{ package.name }}
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="row g-4">
+
+
+        <!-- ========================================= -->
+        <!-- LEFT SIDE -->
+        <!-- ========================================= -->
+
+        <div class="col-lg-8">
+
+            <div class="card border-0 shadow-sm p-4 p-lg-5">
+
+                <span class="category-pill align-self-start">
+                    {{ package.get_package_type_display }}
+                </span>
+
+                <h2 class="mt-2">
+                    Book {{ package.name }}
+                </h2>
+
+                <p class="text-muted">
+                    {{ package.destination.city }},
+                    {{ package.destination.country }}
+                    ·
+                    {{ package.duration_days }} days
+                </p>
+
+
+                <!-- ========================================= -->
+                <!-- BOOKING FORM -->
+                <!-- ========================================= -->
+
+                <form
+                    method="post"
+                    id="bookingForm"
+                    novalidate
+                >
+
+                    {% csrf_token %}
+
+
+                    <!-- ========================================= -->
+                    <!-- 1. TRIP DETAILS -->
+                    <!-- ========================================= -->
+
+                    <h5 class="mt-4">
+                        1. Trip details
+                    </h5>
+
+
+                    <div class="row">
+
+                        {% for field in form %}
+
+                            {% if field.name != 'traveler_data' %}
+
+                                <div
+                                    class="col-md-{% if field.name == 'special_requests' %}12{% else %}6{% endif %} mb-3"
+                                >
+
+                                    <label class="form-label">
+                                        {{ field.label }}
+                                    </label>
+
+
+                                    {% if field.name == 'traveler_phone' %}
+
+                                        <!-- COUNTRY + PHONE -->
+
+                                        <div class="input-group">
+
+                                            <select
+                                                id="tripPhoneCountry"
+                                                class="form-select"
+                                                style="max-width:145px;"
+                                            >
+
+                                                <option
+                                                    value="+91"
+                                                    data-length="10"
+                                                >
+                                                    🇮🇳 +91
+                                                </option>
+
+                                                <option
+                                                    value="+1"
+                                                    data-length="10"
+                                                >
+                                                    🇺🇸 +1
+                                                </option>
+
+                                                <option
+                                                    value="+44"
+                                                    data-length="10"
+                                                >
+                                                    🇬🇧 +44
+                                                </option>
+
+                                                <option
+                                                    value="+61"
+                                                    data-length="9"
+                                                >
+                                                    🇦🇺 +61
+                                                </option>
+
+                                                <option
+                                                    value="+971"
+                                                    data-length="9"
+                                                >
+                                                    🇦🇪 +971
+                                                </option>
+
+                                                <option
+                                                    value="+65"
+                                                    data-length="8"
+                                                >
+                                                    🇸🇬 +65
+                                                </option>
+
+                                                <option
+                                                    value="+60"
+                                                    data-length="9"
+                                                >
+                                                    🇲🇾 +60
+                                                </option>
+
+                                            </select>
+
+
+                                            {{ field }}
+
+                                        </div>
+
+
+                                        <div
+                                            id="tripPhoneHelp"
+                                            class="form-text"
+                                        >
+                                            India +91:
+                                            enter exactly
+                                            10 digits.
+                                        </div>
+
+
+                                        <div
+                                            id="tripPhoneError"
+                                            class="text-danger small"
+                                        ></div>
+
+
+                                    {% else %}
+
+                                        {{ field }}
+
+                                    {% endif %}
+
+
+                                    {% for error in field.errors %}
+
+                                        <div class="text-danger small">
+                                            {{ error }}
+                                        </div>
+
+                                    {% endfor %}
+
+                                </div>
+
+                            {% endif %}
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- Hidden traveller data -->
+
+                    {{ form.traveler_data }}
+
+
+                    <!-- ========================================= -->
+                    <!-- 2. TRAVELLER DETAILS -->
+                    <!-- ========================================= -->
+
+                    <div
+                        class="d-flex justify-content-between align-items-center mt-3"
+                    >
+
+                        <div>
+
+                            <h5 class="mb-1">
+                                2. Traveller details
+                            </h5>
+
+                            <p class="small text-muted mb-0">
+                                Add yourself, family members or
+                                friends travelling with you.
+                            </p>
+
+                        </div>
+
+
+                        <a
+                            href="{% url 'saved_travelers' %}"
+                            target="_blank"
+                            class="btn btn-outline-primary btn-sm rounded-pill"
+                        >
+                            Manage saved travellers
+                        </a>
+
+                    </div>
+
+
+                    <!-- Traveller cards -->
+
+                    <div
+                        id="travelerCards"
+                        class="mt-3"
+                    ></div>
+
+
+                    <div class="alert alert-info mt-3">
+
+                        <i
+                            class="fa-solid fa-circle-info me-2"
+                        ></i>
+
+                        You can save frequent family/friend
+                        details and reuse them on future bookings.
+
+                    </div>
+
+
+                    <!-- ========================================= -->
+                    <!-- NEXT STEP -->
+                    <!-- ========================================= -->
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary btn-lg w-100 rounded-pill mt-2"
+                    >
+                        Continue to Secure Payment
+                    </button>
+
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================================= -->
+        <!-- RIGHT SIDE -->
+        <!-- ========================================= -->
+
+        <div class="col-lg-4">
+
+            <div
+                class="booking-card card p-4 sticky-lg-top"
+                style="top:100px"
+            >
+
+                <img
+                    src="{{ package.image_src }}"
+                    class="rounded-4 mb-3"
+                    style="
+                        height:190px;
+                        width:100%;
+                        object-fit:cover;
+                    "
+                >
+
+
+                <div class="small text-muted">
+                    From
+                </div>
+
+
+                <div class="price-big">
+                    ₹{{ package.effective_price }}
+                </div>
+
+
+                <p class="small text-muted">
+                    per traveller
+                </p>
+
+
+                <hr>
+
+
+                <div class="d-flex justify-content-between">
+
+                    <span>
+                        Seats available
+                    </span>
+
+                    <b>
+                        {{ package.available_seats }}
+                    </b>
+
+                </div>
+
+
+                <div
+                    class="d-flex justify-content-between mt-2"
+                >
+
+                    <span>
+                        Travellers
+                    </span>
+
+                    <b id="travellerCount">
+                        1
+                    </b>
+
+                </div>
+
+
+                <div
+                    class="d-flex justify-content-between mt-2"
+                >
+
+                    <span>
+                        Estimated total
+                    </span>
+
+                    <b id="totalAmount">
+                        ₹{{ package.effective_price }}
+                    </b>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+{% block extra_js %}
+
+<script>
+
+/* =========================================================
+   SAVED TRAVELLERS
+   ========================================================= */
+
+const saved =
+{% if saved_travelers %}
+
+[
+    {% for t in saved_travelers %}
+
+    {
+        id: {{ t.id }},
+        name: "{{ t|escapejs }}"
+    }
+
+    {% if not forloop.last %},{% endif %}
+
+    {% endfor %}
+]
+
+{% else %}
+
+[]
+
+{% endif %};
+
+
+
+/* =========================================================
+   BASIC VARIABLES
+   ========================================================= */
+
+const price =
+    Number('{{ package.effective_price }}');
+
+const countInput =
+    document.getElementById(
+        'id_number_of_travelers'
+    );
+
+const cards =
+    document.getElementById(
+        'travelerCards'
+    );
+
+const hidden =
+    document.getElementById(
+        'id_traveler_data'
+    );
+
+
+
+/* =========================================================
+   COUNTRY OPTIONS
+   ========================================================= */
+
+function countryOptions(className) {
+
+    return `
+
+        <select
+            class="form-select ${className}"
+            style="max-width:145px;"
+        >
+
+            <option
+                value="+91"
+                data-length="10"
+            >
+                🇮🇳 +91
+            </option>
+
+            <option
+                value="+1"
+                data-length="10"
+            >
+                🇺🇸 +1
+            </option>
+
+            <option
+                value="+44"
+                data-length="10"
+            >
+                🇬🇧 +44
+            </option>
+
+            <option
+                value="+61"
+                data-length="9"
+            >
+                🇦🇺 +61
+            </option>
+
+            <option
+                value="+971"
+                data-length="9"
+            >
+                🇦🇪 +971
+            </option>
+
+            <option
+                value="+65"
+                data-length="8"
+            >
+                🇸🇬 +65
+            </option>
+
+            <option
+                value="+60"
+                data-length="9"
+            >
+                🇲🇾 +60
+            </option>
+
+        </select>
+
+    `;
+
+}
+
+
+
+/* =========================================================
+   TRAVELLER CARD
+   ========================================================= */
+
+function card(i) {
+
+    let options = `
+
+        <option value="friend">
+            Friend
+        </option>
+
+        <option value="self">
+            Self
+        </option>
+
+        <option value="spouse">
+            Spouse
+        </option>
+
+        <option value="child">
+            Child
+        </option>
+
+        <option value="parent">
+            Parent
+        </option>
+
+        <option value="sibling">
+            Sibling
+        </option>
+
+        <option value="other">
+            Other
+        </option>
+
+    `;
+
+
+    let savedOptions =
+        saved.map(
+            x =>
+                `<option value="${x.id}">
+                    ${x.name}
+                </option>`
+        ).join('');
+
+
+    return `
+
+    <div
+        class="card border p-3 mb-3 traveler-card"
+        data-index="${i}"
+    >
+
+        <div
+            class="d-flex justify-content-between"
+        >
+
+            <h6>
+                Traveller ${i + 1}
+            </h6>
+
+            <span class="badge text-bg-light">
+                Passenger
+            </span>
+
+        </div>
+
+
+        <div class="row g-2">
+
+
+            <!-- FIRST NAME -->
+
+            <div class="col-md-6">
+
+                <label class="small">
+                    First name *
+                </label>
+
+                <input
+                    class="form-control t-first"
+                    required
+                >
+
+            </div>
+
+
+            <!-- LAST NAME -->
+
+            <div class="col-md-6">
+
+                <label class="small">
+                    Last name
+                </label>
+
+                <input
+                    class="form-control t-last"
+                >
+
+            </div>
+
+
+            <!-- RELATION -->
+
+            <div class="col-md-4">
+
+                <label class="small">
+                    Relation
+                </label>
+
+                <select
+                    class="form-select t-relation"
+                >
+
+                    ${options}
+
+                </select>
+
+            </div>
+
+
+            <!-- GENDER -->
+
+            <div class="col-md-4">
+
+                <label class="small">
+                    Gender
+                </label>
+
+                <select
+                    class="form-select t-gender"
+                >
+
+                    <option value="">
+                        Select
+                    </option>
+
+                    <option value="male">
+                        Male
+                    </option>
+
+                    <option value="female">
+                        Female
+                    </option>
+
+                    <option value="other">
+                        Other
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- PHONE -->
+
+            <div class="col-md-8">
+
+                <label class="small">
+                    Phone number *
+                </label>
+
+                <div class="input-group">
+
+                    ${countryOptions(
+                        't-phone-country'
+                    )}
+
+                    <input
+                        type="tel"
+                        class="form-control t-phone"
+                        required
+                        inputmode="numeric"
+                        pattern="[0-9]*"
+                        placeholder="Phone number"
+                    >
+
+                </div>
+
+
+                <div
+                    class="form-text t-phone-help"
+                >
+                    India +91:
+                    enter 10 digits.
+                </div>
+
+
+                <div
+                    class="text-danger small phone-error"
+                ></div>
+
+            </div>
+
+
+            <!-- EMAIL -->
+
+            <div class="col-md-6">
+
+                <label class="small">
+                    Gmail *
+                </label>
+
+                <input
+                    type="email"
+                    class="form-control t-email"
+                    required
+                    placeholder="example@gmail.com"
+                >
+
+                <div
+                    class="text-danger small email-error"
+                ></div>
+
+            </div>
+
+
+            <!-- NATIONALITY -->
+
+            <div class="col-md-6">
+
+                <label class="small">
+                    Nationality
+                </label>
+
+                <input
+                    class="form-control t-nationality"
+                    value="Indian"
+                >
+
+            </div>
+
+
+            <!-- ID -->
+
+            <div class="col-md-6">
+
+                <label class="small">
+                    Passport / ID number
+                </label>
+
+                <input
+                    class="form-control t-id"
+                >
+
+            </div>
+
+
+            <!-- SPECIAL NEEDS -->
+
+            <div class="col-12">
+
+                <label class="small">
+                    Special needs
+                </label>
+
+                <input
+                    class="form-control t-special"
+                    placeholder="Meal, accessibility, child seat etc."
+                >
+
+            </div>
+
+
+            <!-- SAVED TRAVELLER -->
+
+            ${
+                savedOptions
+                ?
+                `
+                <div class="col-12">
+
+                    <label class="small">
+                        Quick fill from saved traveller
+                    </label>
+
+                    <select
+                        class="form-select saved-fill"
+                    >
+
+                        <option value="">
+                            Choose a saved traveller...
+                        </option>
+
+                        ${savedOptions}
+
+                    </select>
+
+                </div>
+                `
+                :
+                ''
+            }
+
+        </div>
+
+    </div>
+
+    `;
+
+}
+
+
+
+/* =========================================================
+   SETUP PHONE NUMBERS
+   ========================================================= */
+
+function setupTravellerPhones() {
+
+    document
+        .querySelectorAll('.traveler-card')
+        .forEach(function(card) {
+
+            const country =
+                card.querySelector(
+                    '.t-phone-country'
+                );
+
+            const phone =
+                card.querySelector(
+                    '.t-phone'
+                );
+
+            const help =
+                card.querySelector(
+                    '.t-phone-help'
+                );
+
+
+            if (!country || !phone) {
+                return;
+            }
+
+
+            function updatePhoneLimit() {
+
+                const selected =
+                    country.options[
+                        country.selectedIndex
+                    ];
+
+                const length =
+                    Number(
+                        selected.dataset.length
+                    );
+
+
+                phone.value = '';
+
+                phone.maxLength =
+                    length;
+
+                phone.minLength =
+                    length;
+
+                phone.pattern =
+                    '[0-9]{' +
+                    length +
+                    '}';
+
+
+                if (help) {
+
+                    help.textContent =
+                        'Enter exactly ' +
+                        length +
+                        ' digits.';
+
+                }
+
+            }
+
+
+            country.addEventListener(
+                'change',
+                updatePhoneLimit
+            );
+
+
+            phone.addEventListener(
+                'input',
+                function() {
+
+                    this.value =
+                        this.value.replace(
+                            /[^0-9]/g,
+                            ''
+                        );
+
+                }
+            );
+
+
+            updatePhoneLimit();
+
+        });
+
+}
+
+
+
+/* =========================================================
+   COLLECT TRAVELLER DATA
+   ========================================================= */
+
+function collect(event) {
+
+    let out = [];
+
+    let valid = true;
+
+
+    document
+        .querySelectorAll('.traveler-card')
+        .forEach(function(c) {
+
+            const firstName =
+                c.querySelector(
+                    '.t-first'
+                ).value.trim();
+
+            const lastName =
+                c.querySelector(
+                    '.t-last'
+                ).value.trim();
+
+            const relation =
+                c.querySelector(
+                    '.t-relation'
+                ).value;
+
+            const gender =
+                c.querySelector(
+                    '.t-gender'
+                ).value;
+
+            const nationality =
+                c.querySelector(
+                    '.t-nationality'
+                ).value.trim();
+
+            const country =
+                c.querySelector(
+                    '.t-phone-country'
+                );
+
+            const phone =
+                c.querySelector(
+                    '.t-phone'
+                );
+
+            const email =
+                c.querySelector(
+                    '.t-email'
+                );
+
+            const idNumber =
+                c.querySelector(
+                    '.t-id'
+                ).value.trim();
+
+            const specialNeeds =
+                c.querySelector(
+                    '.t-special'
+                ).value.trim();
+
+            const phoneError =
+                c.querySelector(
+                    '.phone-error'
+                );
+
+            const emailError =
+                c.querySelector(
+                    '.email-error'
+                );
+
+
+            phoneError.textContent = '';
+
+            emailError.textContent = '';
+
+
+            /* First name */
+
+            if (!firstName) {
+
+                valid = false;
+
+                c.querySelector(
+                    '.t-first'
+                ).focus();
+
+                return;
+
+            }
+
+
+            /* Phone length */
+
+            const selected =
+                country.options[
+                    country.selectedIndex
+                ];
+
+            const length =
+                Number(
+                    selected.dataset.length
+                );
+
+
+            const phoneNumber =
+                phone.value.trim();
+
+
+            if (
+                !new RegExp(
+                    '^\\d{' +
+                    length +
+                    '}$'
+                ).test(
+                    phoneNumber
+                )
+            ) {
+
+                valid = false;
+
+                phoneError.textContent =
+                    'Please enter exactly ' +
+                    length +
+                    ' digits.';
+
+                phone.focus();
+
+                return;
+
+            }
+
+
+            /* Gmail */
+
+            const emailValue =
+                email.value.trim();
+
+
+            if (
+                !/^[a-zA-Z0-9._%+-]+@gmail\.com$/
+                    .test(emailValue)
+            ) {
+
+                valid = false;
+
+                emailError.textContent =
+                    'Email must end with @gmail.com.';
+
+                email.focus();
+
+                return;
+
+            }
+
+
+            /* Save */
+
+            out.push({
+
+                first_name:
+                    firstName,
+
+                last_name:
+                    lastName,
+
+                relation:
+                    relation,
+
+                gender:
+                    gender,
+
+                nationality:
+                    nationality,
+
+                phone:
+                    phoneNumber,
+
+                email:
+                    emailValue,
+
+                id_number:
+                    idNumber,
+
+                special_needs:
+                    specialNeeds
+
+            });
+
+        });
+
+
+    if (!valid) {
+
+        event.preventDefault();
+
+        return false;
+
+    }
+
+
+    hidden.value =
+        JSON.stringify(out);
+
+}
+
+
+
+/* =========================================================
+   RENDER TRAVELLERS
+   ========================================================= */
+
+function render() {
+
+    let n =
+        Math.max(
+            1,
+            Math.min(
+                Number(
+                    countInput.value
+                ) || 1,
+                20
+            )
+        );
+
+
+    cards.innerHTML =
+        Array
+            .from(
+                { length: n },
+                (_, i) => card(i)
+            )
+            .join('');
+
+
+    document
+        .getElementById(
+            'travellerCount'
+        )
+        .textContent = n;
+
+
+    document
+        .getElementById(
+            'totalAmount'
+        )
+        .textContent =
+            '₹' +
+            (
+                price * n
+            ).toFixed(2);
+
+
+    setupTravellerPhones();
+
+
+    /*
+    Saved traveller
+    */
+
+    document
+        .querySelectorAll(
+            '.saved-fill'
+        )
+        .forEach(
+            function(s) {
+
+                s.addEventListener(
+                    'change',
+                    async function() {
+
+                        if (!s.value) {
+                            return;
+                        }
+
+
+                        let c =
+                            s.closest(
+                                '.traveler-card'
+                            );
+
+
+                        try {
+
+                            let response =
+                                await fetch(
+                                    '/bookings/travellers/' +
+                                    s.value +
+                                    '/json/'
+                                );
+
+
+                            let d =
+                                await response.json();
+
+
+                            Object.entries(d)
+                                .forEach(
+                                    function([
+                                        k,
+                                        v
+                                    ]) {
+
+                                        let map = {
+
+                                            first_name:
+                                                'first',
+
+                                            last_name:
+                                                'last',
+
+                                            gender:
+                                                'gender',
+
+                                            nationality:
+                                                'nationality',
+
+                                            phone:
+                                                'phone',
+
+                                            email:
+                                                'email',
+
+                                            id_number:
+                                                'id',
+
+                                            relation:
+                                                'relation'
+
+                                        };
+
+
+                                        let el =
+                                            c.querySelector(
+                                                '.t-' +
+                                                (
+                                                    map[k]
+                                                    || 'x'
+                                                )
+                                            );
+
+
+                                        if (
+                                            el &&
+                                            v !== undefined
+                                        ) {
+
+                                            el.value =
+                                                v;
+
+                                        }
+
+                                    }
+                                );
+
+                        }
+                        catch(error) {
+
+                            console.error(
+                                error
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+
+/* =========================================================
+   TRAVELLER COUNT
+   ========================================================= */
+
+countInput.addEventListener(
+    'input',
+    render
+);
+
+
+
+/* =========================================================
+   FORM SUBMIT
+   ========================================================= */
+
+document
+    .getElementById(
+        'bookingForm'
+    )
+    .addEventListener(
+        'submit',
+        function(event) {
+
+
+            /* Trip phone */
+
+            const tripCountry =
+                document.getElementById(
+                    'tripPhoneCountry'
+                );
+
+            const tripPhone =
+                document.getElementById(
+                    'id_traveler_phone'
+                );
+
+            const tripError =
+                document.getElementById(
+                    'tripPhoneError'
+                );
+
+
+            const tripSelected =
+                tripCountry.options[
+                    tripCountry.selectedIndex
+                ];
+
+            const tripLength =
+                Number(
+                    tripSelected.dataset.length
+                );
+
+
+            tripError.textContent = '';
+
+
+            if (
+                !new RegExp(
+                    '^\\d{' +
+                    tripLength +
+                    '}$'
+                ).test(
+                    tripPhone.value.trim()
+                )
+            ) {
+
+                event.preventDefault();
+
+                tripError.textContent =
+                    'Please enter exactly ' +
+                    tripLength +
+                    ' digits.';
+
+                tripPhone.focus();
+
+                return;
+
+            }
+
+
+            /*
+            Traveller validation
+            */
+
+            collect(event);
+
+        }
+    );
+
+
+
+/* =========================================================
+   TRIP PHONE - ONLY NUMBERS
+   ========================================================= */
+
+const tripPhone =
+    document.getElementById(
+        'id_traveler_phone'
+    );
+
+
+if (tripPhone) {
+
+    tripPhone.addEventListener(
+        'input',
+        function() {
+
+            this.value =
+                this.value.replace(
+                    /[^0-9]/g,
+                    ''
+                );
+
+        }
+    );
+
+}
+
+
+
+/* =========================================================
+   TRIP COUNTRY CHANGE
+   ========================================================= */
+
+const tripCountry =
+    document.getElementById(
+        'tripPhoneCountry'
+    );
+
+const tripPhoneHelp =
+    document.getElementById(
+        'tripPhoneHelp'
+    );
+
+
+if (tripCountry) {
+
+    tripCountry.addEventListener(
+        'change',
+        function() {
+
+            const selected =
+                this.options[
+                    this.selectedIndex
+                ];
+
+            const length =
+                Number(
+                    selected.dataset.length
+                );
+
+
+            tripPhone.value = '';
+
+            tripPhone.maxLength =
+                length;
+
+            tripPhone.minLength =
+                length;
+
+            tripPhone.pattern =
+                '[0-9]{' +
+                length +
+                '}';
+
+
+            tripPhoneHelp.textContent =
+                'Enter exactly ' +
+                length +
+                ' digits.';
+
+        }
+    );
+
+
+    /*
+    Initial country
+    */
+
+    const selected =
+        tripCountry.options[
+            tripCountry.selectedIndex
+        ];
+
+    const length =
+        Number(
+            selected.dataset.length
+        );
+
+
+    tripPhone.maxLength =
+        length;
+
+    tripPhone.minLength =
+        length;
+
+    tripPhone.pattern =
+        '[0-9]{' +
+        length +
+        '}';
+
+}
+
+
+
+/* =========================================================
+   FIRST RENDER
+   ========================================================= */
+
+render();
+
+</script>
+
+{% endblock %}

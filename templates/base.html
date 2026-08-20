@@ -1,0 +1,100 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Wanderly Travel & Holidays - curated India and international holiday packages.">
+    <title>{% block title %}Travel & Holidays{% endblock %} | Wanderly</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=5">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top border-bottom shadow-sm">
+  <div class="container">
+    <div class="d-flex align-items-center gap-2 nav-icon-group">
+      <a href="javascript:history.back()" class="btn btn-light rounded-circle nav-icon-btn" title="Back" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></a>
+      <a href="javascript:history.forward()" class="btn btn-light rounded-circle nav-icon-btn" title="Forward" aria-label="Forward"><i class="fa-solid fa-arrow-right"></i></a>
+      <a href="{% url 'home' %}" class="btn btn-light rounded-circle nav-icon-btn" title="Home" aria-label="Home"><i class="fa-solid fa-house"></i></a>
+    </div>
+    <a class="navbar-brand fw-black text-primary" href="{% url 'home' %}">
+      <span class="brand-mark"><i class="fa-solid fa-paper-plane"></i></span> Wanderly
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav mx-auto gap-lg-1">
+        <li class="nav-item"><a class="nav-link" href="{% url 'package_list' %}">Holiday Packages</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'destination_list' %}">Destinations</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'package_list' %}?type=honeymoon">Honeymoon</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'package_list' %}?type=family">Family</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'blog' %}">Travel Guide</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'contact' %}">Contact</a></li>
+      </ul>
+      <div class="d-flex align-items-center gap-2">
+        <a href="{% url 'enquiry' %}" class="btn btn-primary btn-sm rounded-pill px-3">Plan My Trip</a>
+        {% if user.is_authenticated %}
+          <div class="dropdown">
+            <a class="btn btn-light rounded-circle user-btn" href="#" data-bs-toggle="dropdown"><i class="fa-solid fa-user"></i></a>
+            <ul class="dropdown-menu dropdown-menu-end shadow">
+              <li><a class="dropdown-item" href="{% url 'profile' %}">My Profile</a></li>
+              <li><a class="dropdown-item" href="{% url 'my_bookings' %}">My Bookings</a></li>
+              <li><a class="dropdown-item" href="{% url 'wishlist' %}">Wishlist</a></li>
+              {% if user.is_staff %}<li><a class="dropdown-item" href="/admin/">Admin Dashboard</a></li>{% endif %}
+              <li><hr class="dropdown-divider"></li>
+              <li><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="dropdown-item">Logout</button></form></li>
+            </ul>
+          </div>
+        {% else %}
+          <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm rounded-pill">Login</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container position-relative z-3">
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-3 shadow-sm">
+      {{ message }} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  {% endfor %}
+{% endif %}
+</div>
+
+<main>{% block content %}{% endblock %}</main>
+
+<footer class="footer pt-5 pb-3 mt-5">
+ <div class="container">
+  <div class="row g-4">
+   <div class="col-lg-4">
+    <h4 class="fw-bold text-white"><i class="fa-solid fa-paper-plane me-2"></i>Wanderly</h4>
+    <p class="text-white-50">Handcrafted holidays, memorable experiences and personal travel assistance for India and the world.</p>
+    <div class="small text-white-50"><i class="fa-solid fa-phone me-2"></i>+91 90000 00000</div>
+    <div class="small text-white-50 mt-2"><i class="fa-solid fa-envelope me-2"></i>hello@wanderly.example</div>
+   </div>
+   <div class="col-6 col-lg-2"><h6 class="text-white">Explore</h6>
+    <a href="{% url 'package_list' %}">Packages</a><a href="{% url 'destination_list' %}">Destinations</a><a href="{% url 'blog' %}">Travel Guide</a><a href="{% url 'enquiry' %}">Plan a Trip</a>
+   </div>
+   <div class="col-6 col-lg-2"><h6 class="text-white">Travel Types</h6>
+    <a href="{% url 'package_list' %}?type=honeymoon">Honeymoon</a><a href="{% url 'package_list' %}?type=family">Family</a><a href="{% url 'package_list' %}?type=adventure">Adventure</a><a href="{% url 'package_list' %}?type=luxury">Luxury</a>
+   </div>
+   <div class="col-lg-4">
+    <h6 class="text-white">Get travel inspiration</h6>
+    <p class="text-white-50 small">Offers, new packages and destination ideas.</p>
+    <form method="post" action="{% url 'newsletter_subscribe' %}" class="d-flex gap-2">{% csrf_token %}<input class="form-control" type="email" name="email" placeholder="Email address" required><button class="btn btn-primary">Subscribe</button></form>
+   </div>
+  </div>
+  <hr class="border-secondary my-4">
+  <div class="d-flex justify-content-between flex-wrap gap-2 small text-white-50"><span>© 2026 Wanderly Travel & Holidays</span><span>Privacy · Terms · Cancellation Policy</span></div>
+ </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>
