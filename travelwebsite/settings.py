@@ -1,115 +1,149 @@
-"""
-Django settings for travelwebsite project.
-Travel and Tourism Website - CDIT_PY_00008
-"""
-
 import os
 from pathlib import Path
 
 import dj_database_url
 from dotenv import load_dotenv
 
-# ------------------------------------------------------------------------------
-# Base directory
-# ------------------------------------------------------------------------------
+
+# ============================================================
+# BASE DIRECTORY
+# ============================================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load environment variables from .env
+
+# ============================================================
+# LOAD .env FOR LOCAL DEVELOPMENT
+# ============================================================
+
 load_dotenv(BASE_DIR / ".env")
 
 
-# ------------------------------------------------------------------------------
-# Security
-# ------------------------------------------------------------------------------
+# ============================================================
+# SECURITY
+# ============================================================
 
-SECRET_KEY = os.environ.get(
-    "DJANGO_SECRET_KEY",
-    "django-insecure-local-development-only-key"
+# ============================================================
+# SECURITY
+# ============================================================
+
+DEBUG = os.environ.get(
+    "DJANGO_DEBUG",
+    "True"
+).lower() in (
+    "true",
+    "1",
+    "yes",
 )
 
-# Development can explicitly set DJANGO_DEBUG=True.
-# Production defaults to False.
-DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() == "true"
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
-# Local hosts
+if not SECRET_KEY:
+    if DEBUG:
+        # Local development only
+        SECRET_KEY = "django-insecure-local-development-key"
+    else:
+        raise RuntimeError(
+            "DJANGO_SECRET_KEY environment variable is not set."
+        )
+
+
+# ============================================================
+# ALLOWED HOSTS
+# ============================================================
+
+allowed_hosts = os.environ.get(
+    "DJANGO_ALLOWED_HOSTS",
+    "localhost,127.0.0.1"
+)
+
 ALLOWED_HOSTS = [
     host.strip()
-    for host in os.environ.get(
-        "DJANGO_ALLOWED_HOSTS",
-        "localhost,127.0.0.1"
-    ).split(",")
+    for host in allowed_hosts.split(",")
     if host.strip()
 ]
 
-# Render automatically provides the external hostname.
-RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
-
-if RENDER_EXTERNAL_HOSTNAME:
-    if RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
-        ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+# Render hostname
+if "wanderly-holidays.onrender.com" not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append("wanderly-holidays.onrender.com")
 
 
-# ------------------------------------------------------------------------------
-# Application definition
-# ------------------------------------------------------------------------------
+# ============================================================
+# CSRF TRUSTED ORIGINS
+# ============================================================
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://wanderly-holidays.onrender.com",
+]
+
+
+# ============================================================
+# APPLICATIONS
+# ============================================================
 
 INSTALLED_APPS = [
+    # Django
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.humanize",
 
-    # Third-party apps
+    # Third-party
     "crispy_forms",
     "crispy_bootstrap5",
 
     # Local apps
+    "accounts",
     "destinations",
     "bookings",
-    "accounts",
     "payments",
 ]
 
 
-# ------------------------------------------------------------------------------
-# Middleware
-# ------------------------------------------------------------------------------
+# ============================================================
+# MIDDLEWARE
+# ============================================================
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
 
-    # WhiteNoise serves static files in production
+    # WhiteNoise for Render static files
     "whitenoise.middleware.WhiteNoiseMiddleware",
 
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
+
     "django.middleware.csrf.CsrfViewMiddleware",
+
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 
-# ------------------------------------------------------------------------------
-# URL configuration
-# ------------------------------------------------------------------------------
+# ============================================================
+# URL CONFIGURATION
+# ============================================================
 
 ROOT_URLCONF = "travelwebsite.urls"
 
 
-# ------------------------------------------------------------------------------
-# Templates
-# ------------------------------------------------------------------------------
+# ============================================================
+# TEMPLATES
+# ============================================================
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
+
+        "DIRS": [
+            BASE_DIR / "templates",
+        ],
+
         "APP_DIRS": True,
+
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.debug",
@@ -122,70 +156,61 @@ TEMPLATES = [
 ]
 
 
-# ------------------------------------------------------------------------------
-# WSGI / ASGI
-# ------------------------------------------------------------------------------
+# ============================================================
+# WSGI
+# ============================================================
 
 WSGI_APPLICATION = "travelwebsite.wsgi.application"
-ASGI_APPLICATION = "travelwebsite.asgi.application"
 
 
-# ------------------------------------------------------------------------------
-# Database
-# ------------------------------------------------------------------------------
-#
-# Local development:
-#   Uses SQLite automatically when DATABASE_URL is not present.
-#
-# Render production:
-#   Uses PostgreSQL through the DATABASE_URL environment variable.
-#
-# ------------------------------------------------------------------------------
+# ============================================================
+# DATABASE
+# ============================================================
 
-DATABASES = {
-    "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-}
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=True,
+        )
+    }
+else:
+    # Local development
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
-# ------------------------------------------------------------------------------
-# Password validation
-# ------------------------------------------------------------------------------
+# ============================================================
+# PASSWORD VALIDATION
+# ============================================================
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": (
-            "django.contrib.auth.password_validation."
-            "UserAttributeSimilarityValidator"
-        )
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        "NAME": (
-            "django.contrib.auth.password_validation."
-            "MinimumLengthValidator"
-        )
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        "NAME": (
-            "django.contrib.auth.password_validation."
-            "CommonPasswordValidator"
-        )
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        "NAME": (
-            "django.contrib.auth.password_validation."
-            "NumericPasswordValidator"
-        )
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
 
-# ------------------------------------------------------------------------------
-# Internationalization
-# ------------------------------------------------------------------------------
+# ============================================================
+# INTERNATIONALIZATION
+# ============================================================
 
 LANGUAGE_CODE = "en-us"
 
@@ -196,149 +221,63 @@ USE_I18N = True
 USE_TZ = True
 
 
-# ------------------------------------------------------------------------------
-# Static files
-# ------------------------------------------------------------------------------
+# ============================================================
+# STATIC FILES
+# ============================================================
 
 STATIC_URL = "/static/"
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static"
-]
-
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# WhiteNoise compressed static-file storage
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
+# WhiteNoise compression
 STATICFILES_STORAGE = (
     "whitenoise.storage.CompressedManifestStaticFilesStorage"
 )
 
 
-# ------------------------------------------------------------------------------
-# Media / user-uploaded files
-# ------------------------------------------------------------------------------
+# ============================================================
+# MEDIA FILES
+# ============================================================
 
 MEDIA_URL = "/media/"
 
 MEDIA_ROOT = BASE_DIR / "media"
 
 
-# ------------------------------------------------------------------------------
-# Default primary key
-# ------------------------------------------------------------------------------
+# ============================================================
+# DEFAULT PRIMARY KEY
+# ============================================================
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-# ------------------------------------------------------------------------------
-# Crispy Forms
-# ------------------------------------------------------------------------------
+# ============================================================
+# CRISPY FORMS
+# ============================================================
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 
-# ------------------------------------------------------------------------------
-# Authentication redirects
-# ------------------------------------------------------------------------------
+# ============================================================
+# LOGIN / LOGOUT
+# ============================================================
 
-LOGIN_URL = "login"
+LOGIN_URL = "/accounts/login/"
 
-LOGIN_REDIRECT_URL = "home"
+LOGIN_REDIRECT_URL = "/"
 
-LOGOUT_REDIRECT_URL = "home"
-
-
-# ------------------------------------------------------------------------------
-# Razorpay
-# ------------------------------------------------------------------------------
-
-RAZORPAY_KEY_ID = os.environ.get(
-    "RAZORPAY_KEY_ID",
-    ""
-)
-
-RAZORPAY_KEY_SECRET = os.environ.get(
-    "RAZORPAY_KEY_SECRET",
-    ""
-)
-
-# Demo mode automatically enabled when real Razorpay keys are unavailable.
-PAYMENTS_DEMO_MODE = not (
-    RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET
-)
+LOGOUT_REDIRECT_URL = "/"
 
 
-# ------------------------------------------------------------------------------
-# OpenWeatherMap API
-# ------------------------------------------------------------------------------
-
-OPENWEATHERMAP_API_KEY = os.environ.get(
-    "OPENWEATHERMAP_API_KEY",
-    ""
-)
-
-
-# ------------------------------------------------------------------------------
-# Email settings
-# ------------------------------------------------------------------------------
-
-EMAIL_BACKEND = os.environ.get(
-    "EMAIL_BACKEND",
-    "django.core.mail.backends.console.EmailBackend"
-)
-
-EMAIL_HOST = os.environ.get(
-    "EMAIL_HOST",
-    "smtp.gmail.com"
-)
-
-EMAIL_PORT = int(
-    os.environ.get(
-        "EMAIL_PORT",
-        "587"
-    )
-)
-
-EMAIL_USE_TLS = True
-
-EMAIL_HOST_USER = os.environ.get(
-    "EMAIL_HOST_USER",
-    ""
-)
-
-EMAIL_HOST_PASSWORD = os.environ.get(
-    "EMAIL_HOST_PASSWORD",
-    ""
-)
-
-DEFAULT_FROM_EMAIL = (
-    EMAIL_HOST_USER
-    or "noreply@travelwebsite.local"
-)
-
-
-# ------------------------------------------------------------------------------
-# Django message tags
-# ------------------------------------------------------------------------------
-
-MESSAGE_TAGS = {
-    10: "debug",
-    20: "info",
-    25: "success",
-    30: "warning",
-    40: "danger",
-}
-
-
-# ------------------------------------------------------------------------------
-# Production security settings
-# ------------------------------------------------------------------------------
-#
-# These are enabled only when DEBUG=False.
-# They help protect the deployed application.
-# ------------------------------------------------------------------------------
+# ============================================================
+# SECURITY SETTINGS FOR PRODUCTION
+# ============================================================
 
 if not DEBUG:
 
@@ -347,20 +286,95 @@ if not DEBUG:
         "https",
     )
 
-    SECURE_SSL_REDIRECT = True
-
     SESSION_COOKIE_SECURE = True
 
     CSRF_COOKIE_SECURE = True
 
-    SECURE_HSTS_SECONDS = 31536000
-
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-
-    SECURE_HSTS_PRELOAD = True
+    SECURE_BROWSER_XSS_FILTER = True
 
     SECURE_CONTENT_TYPE_NOSNIFF = True
 
+    X_FRAME_OPTIONS = "DENY"
+
     SECURE_REFERRER_POLICY = "same-origin"
 
-    X_FRAME_OPTIONS = "DENY"
+
+# ============================================================
+# SESSION
+# ============================================================
+
+SESSION_COOKIE_AGE = 1209600  # 2 weeks
+
+SESSION_SAVE_EVERY_REQUEST = False
+
+
+# ============================================================
+# EMAIL
+# ============================================================
+
+EMAIL_BACKEND = os.environ.get(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend",
+)
+
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
+
+EMAIL_PORT = int(
+    os.environ.get("EMAIL_PORT", "587")
+)
+
+EMAIL_USE_TLS = (
+    os.environ.get("EMAIL_USE_TLS", "True").lower()
+    == "true"
+)
+
+EMAIL_HOST_USER = os.environ.get(
+    "EMAIL_HOST_USER",
+    "",
+)
+
+EMAIL_HOST_PASSWORD = os.environ.get(
+    "EMAIL_HOST_PASSWORD",
+    "",
+)
+
+DEFAULT_FROM_EMAIL = os.environ.get(
+    "DEFAULT_FROM_EMAIL",
+    "Wanderly Holidays <noreply@wanderlyholidays.com>",
+)
+
+
+# ============================================================
+# RAZORPAY
+# ============================================================
+
+RAZORPAY_KEY_ID = os.environ.get(
+    "RAZORPAY_KEY_ID",
+    "",
+)
+
+RAZORPAY_KEY_SECRET = os.environ.get(
+    "RAZORPAY_KEY_SECRET",
+    "",
+)
+
+
+# ============================================================
+# LOGGING
+# ============================================================
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+}
