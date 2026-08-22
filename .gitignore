@@ -22,3 +22,6 @@ staticfiles/
 # OS
 .DS_Store
 Thumbs.db
+destinations_data.json
+
+db.sqlite3.backup
